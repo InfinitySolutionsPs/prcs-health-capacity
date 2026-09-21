@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
+import { requireRole } from "@/lib/authorization";
 
 export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
+  if(!await requireRole(["admin","editor"]))return NextResponse.json({error:"ليس لديك صلاحية التعديل"},{status:403});
   try{
     const {id}=await params;const recordId=Number(id);const body=await req.json();
     const jobTitleId=Number(body.jobTitleId),required=Number(body.required),available=Number(body.available);const title=await getRawDb().prepare("SELECT name FROM job_titles WHERE id=? AND active=1").bind(jobTitleId).first<{name:string}>();

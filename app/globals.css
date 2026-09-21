@@ -109,3 +109,19 @@ body {
 
 input, textarea, button, select { font-family: inherit; font-size: 1rem; }
 input, textarea { text-align: right; }
+
+[dir="rtl"] form,
+[dir="rtl"] label,
+[dir="rtl"] [data-slot="dialog-content"],
+[dir="rtl"] [data-slot="select-content"],
+[dir="rtl"] [data-slot="popover-content"],
+[dir="rtl"] [data-slot="command"] {
+  text-align: right;
+}
+
+[dir="rtl"] [data-slot="select-trigger"],
+[dir="rtl"] [data-slot="command-input"],
+[dir="rtl"] [data-slot="input"] {
+  direction: rtl;
+  text-align: right;
+}

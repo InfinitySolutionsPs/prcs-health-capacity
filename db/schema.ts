@@ -44,3 +44,16 @@ export const systemMetadata=sqliteTable("system_metadata",{
   key:text("key").primaryKey(),
   value:text("value").notNull(),
 });
+
+export const systemUsers=sqliteTable("system_users",{
+  id:integer("id").primaryKey({autoIncrement:true}),
+  authUserId:text("auth_user_id"),
+  email:text("email").notNull(),
+  name:text("name").notNull(),
+  role:text("role",{enum:["admin","editor","viewer"]}).notNull().default("viewer"),
+  active:integer("active",{mode:"boolean"}).notNull().default(true),
+  createdAt:text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+},t=>[
+  uniqueIndex("idx_system_users_email").on(t.email),
+  uniqueIndex("idx_system_users_auth_user_id").on(t.authUserId),
+]);

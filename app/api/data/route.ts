@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
 import { ensureNormalizedSettings } from "@/db/seed";
+import { getAuthorizedUser } from "@/lib/authorization";
 
 export const dynamic="force-dynamic";
 export async function GET(){
   try{
+    if(!await getAuthorizedUser())return NextResponse.json({error:"يرجى تسجيل الدخول"},{status:401});
     await ensureNormalizedSettings();
     const db=getRawDb();
     const [hospitals,administrations,departments,jobTitles,staffing]=await db.batch([

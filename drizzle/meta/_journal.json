@@ -22,6 +22,13 @@
       "when": 1789997935419,
       "tag": "0002_real_maximus",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790017046007,
+      "tag": "0003_equal_bucky",
+      "breakpoints": true
     }
   ]
 }
