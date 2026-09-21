@@ -125,3 +125,28 @@ input, textarea { text-align: right; }
   direction: rtl;
   text-align: right;
 }
+
+/* Keep every Radix select visually RTL, including its portalled menu. */
+html[dir="rtl"] [data-slot="select-value"] {
+  flex: 1;
+  justify-content: flex-start;
+  text-align: right;
+}
+
+html[dir="rtl"] [data-slot="select-content"],
+html[dir="rtl"] [data-slot="select-viewport"],
+html[dir="rtl"] [data-slot="select-item"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] [data-slot="select-item"] {
+  justify-content: flex-start;
+  padding-right: 0.75rem;
+  padding-left: 2rem;
+}
+
+html[dir="rtl"] [data-slot="select-item-indicator"] {
+  right: auto;
+  left: 0.5rem;
+}
