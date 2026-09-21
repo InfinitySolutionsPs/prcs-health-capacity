@@ -1,0 +1,2781 @@
+{
+  "source": "احتياج المستشفيات - ولاء.xlsx",
+  "records": [
+    {
+      "hospital": "مستشفى القدس",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير التمريض",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المسؤول المالي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم القلب والقسطرة",
+      "jobTitle": "رئيس القلب والقسطرة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم القلب والقسطرة",
+      "jobTitle": "أطباء القلب والقسطرة",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم القلب",
+      "jobTitle": "رئيس قسم القلب",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم القلب",
+      "jobTitle": "أطباء القلب",
+      "required": 5,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "رئيس قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "اطباء النساء والتوليد",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الأطفال",
+      "jobTitle": "رئيس قسم الاطفال",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الأطفال",
+      "jobTitle": "اطباء قسم الأطفال",
+      "required": 6,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "رئيس قسم الحضانة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "أطباء قسم الحضانة",
+      "required": 6,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "رئيس قسم جراحة العيون",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "أطباء جراحة العيون",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "رئيس قسم الجراحة",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "رئيس قسم العظام",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "أطباء قسم العظام",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "وحدة المناظير",
+      "jobTitle": "أطباء قسم المناظير",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "رئيس قسم التأهيل الطبي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "طبيب",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "طبيب جراحة",
+      "required": 9,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "رئيس قسم الطوارئ",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "أطباء قسم الطوارئ",
+      "required": 9,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس قسم التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "أطباء قسم التخدير",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "رئيس قسم العناية المركزة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "أطباء العناية المركزة",
+      "required": 4,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "رئيس قسم العيادات التخصصية",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الطبية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "طبيب",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم قسم الحضانة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الاطفال",
+      "jobTitle": "حكيم قسم الأطفال",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الاطفال",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس فنيي التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "فني تخدير",
+      "required": 7,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم القلب والقسطرة",
+      "jobTitle": "حكيم قسم القلب والقسطرة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم القلب والقسطرة",
+      "jobTitle": "حكيم",
+      "required": 7,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "عناية القلب",
+      "jobTitle": "حكيم قسم عناية القلب",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "عناية القلب",
+      "jobTitle": "حكيم",
+      "required": 8,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "حكيم قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "قابلة قانونيه",
+      "required": 10,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم قسم العمليات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم",
+      "required": 8,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم جراحة عامة",
+      "jobTitle": "حكيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم المناظير",
+      "jobTitle": "حكيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم قسم الجراحة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم قسم الباطنة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "حكيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم قسم العناية المركزة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "حكيم العيادات التخصصية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "حكيم",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "رئيس قسم الصيدلية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "صيدلي",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "أخصائي بصريات",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "رئيس قسم مختبر",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 8,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "فنيو أشعة",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "رئيس قسم العلاج الطبيعي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي العلاج الطبيعي",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "رئيس قسم علاج وظيفي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي علاج وظيفي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "رئيس قسم علاج نطق",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "علاج نطق",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 4,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم تكنولوجيا المعلومات",
+      "jobTitle": "موظف تكنولوجيا المعلومات",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "محاسب",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "كاتب حسابات",
+      "required": 4,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "رئيس قسم شؤون المرظفين",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "رئيس قسم شؤون المرضى",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 7,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الأرشيف الطبي",
+      "jobTitle": "موظف ارشيف طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني غازات طبية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "مهندس أجهزة طبية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني صيانة طبية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "التعقيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني صيانة عامة",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني كهرباء",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "مشرف نظافة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل تشهيلات",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "سائق",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 18,
+      "available": 18
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "مراسل",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى القدس",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل مغسلة",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير التمريض",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المسؤول المالي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "رئيس قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "اطباء النساء والتوليد",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "رئيس قسم الحضانة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "أطباء قسم الحضانة",
+      "required": 4,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "رئيس قسم جراحة العيون",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "أطباء جراحة العيون",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "رئيس قسم الجراحة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "رئيس قسم العظام",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "أطباء قسم العظام",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "رئيس قسم الباطنة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "طبيب باطنة",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "رئيس قسم التأهيل الطبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "طبيب",
+      "required": 5,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "طبيب جراحة",
+      "required": 9,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "رئيس قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "أطباء قسم الطوارئ",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس قسم التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "أطباء قسم التخدير",
+      "required": 10,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "رئيس قسم العناية المركزة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "أطباء العناية المركزة",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الطبية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "رئيس قسم العيادات التخصصية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم قسم الحضانة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم",
+      "required": 7,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الاطفال",
+      "jobTitle": "حكيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس فنيي التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "فني تخدير",
+      "required": 10,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم القلب والقسطرة",
+      "jobTitle": "حكيم",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "حكيم قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "قابلة قانونيه",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم قسم العمليات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم جراحة عامة",
+      "jobTitle": "حكيم قسم الجراحة العامة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم جراحة عامة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "حكيم",
+      "required": 12,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "حكيم قسم التأهيل الطبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الباطنة",
+      "jobTitle": "حكيم",
+      "required": 6,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم قسم العناية المركزة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم",
+      "required": 6,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "حكيم",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم",
+      "required": 13,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التعقيم",
+      "jobTitle": "ممرض",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "رئيس قسم الصيدلية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "صيدلي",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "أخصائي بصريات",
+      "required": 3,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "رئيس قسم مختبر",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 7,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "فنيو أشعة",
+      "required": 7,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "رئيس قسم العلاج الطبيعي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي العلاج الطبيعي",
+      "required": 10,
+      "available": 10
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "رئيس قسم علاج وظيفي",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي علاج وظيفي",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "علاج نطق",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم تكنولوجيا المعلومات",
+      "jobTitle": "موظف تكنولوجيا المعلومات",
+      "required": 3,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "محاسب",
+      "required": 3,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "كاتب حسابات",
+      "required": 8,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "رئيس قسم شؤون المرظفين",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "رئيس قسم شؤون المرضى",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 12,
+      "available": 13
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الأرشيف الطبي",
+      "jobTitle": "موظف ارشيف طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "رئيس قسم الصيانة - تخصص كهرباء",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني غازات طبية",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني صيانة طبية",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "التعقيم",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني كهرباء",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "مشرف نظافة",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل تشهيلات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "سائق",
+      "required": 3,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 14,
+      "available": 12
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "مراسل",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الأمل",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل مغسلة",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير التمريض",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المسؤول المالي",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "رئيس قسم الجراحة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "أطباء قسم العظام",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "رئيس قسم الباطنة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "طبيب باطنة",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "طبيب جراحة",
+      "required": 6,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "رئيس قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "أطباء قسم الطوارئ",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس قسم التخدير",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "أطباء قسم التخدير",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "رئيس قسم العناية المركزة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "أطباء العناية المركزة",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الطبية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "رئيس قسم العيادات التخصصية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "فني تخدير",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم قسم العمليات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم جراحة عامة",
+      "jobTitle": "حكيم قسم الجراحة العامة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم جراحة عامة",
+      "jobTitle": "حكيم",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم قسم الباطنة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم قسم العناية المركزة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "حكيم",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 9
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التعقيم",
+      "jobTitle": "ممرض",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "رئيس قسم الصيدلية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "صيدلي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "رئيس قسم مختبر",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "فنيو أشعة",
+      "required": 6,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي العلاج الطبيعي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "محاسب",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "كاتب حسابات",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "رئيس قسم شؤون المرضى",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 6,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الأرشيف الطبي",
+      "jobTitle": "موظف ارشيف طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "رئيس قسم الصيانة - تخصص كهرباء",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني غازات طبية",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني صيانة طبية",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني صيانة عامة",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "سائق",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى السرايا",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 15,
+      "available": 10
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير التمريض",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المسؤول المالي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "رئيس قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "اطباء النساء والتوليد",
+      "required": 15,
+      "available": 9
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة الأطفال",
+      "jobTitle": "رئيس قسم جراحة الأطفال",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم جراحة الأطفال",
+      "jobTitle": "أطباء قسم جراحة الأطفال",
+      "required": 5,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "رئيس قسم الحضانة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الحضانة",
+      "jobTitle": "أطباء قسم الحضانة",
+      "required": 5,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "رئيس قسم الجراحة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "رئيس قسم العظام",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم العظام",
+      "jobTitle": "أطباء قسم العظام",
+      "required": 5,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "رئيس قسم الباطنة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "طبيب باطنة",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "طبيب جراحة",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "رئيس قسم الطوارئ",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "أطباء قسم الطوارئ",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس قسم التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "أطباء قسم التخدير",
+      "required": 7,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "رئيس قسم العناية المركزة",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم العناية المركزة",
+      "jobTitle": "أطباء العناية المركزة",
+      "required": 5,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "رئيس قسم العيادات التخصصية",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم قسم الحضانة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الحضانة",
+      "jobTitle": "حكيم",
+      "required": 12,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس فنيي التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "فني تخدير",
+      "required": 8,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "حكيم قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "قابلة قانونيه",
+      "required": 14,
+      "available": 9
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم قسم العمليات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم",
+      "required": 12,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم قسم الجراحة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم قسم الباطنة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم العيادات التخصصية",
+      "jobTitle": "حكيم",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم التعقيم",
+      "jobTitle": "ممرض",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "رئيس قسم الصيدلية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "صيدلي",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "رئيس قسم مختبر",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 6,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "فنيو أشعة",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "محاسب",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "رئيس قسم شؤون المرضى",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الأرشيف الطبي",
+      "jobTitle": "موظف ارشيف طبي",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "رئيس قسم الصيانة - تخصص كهرباء",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني غازات طبية",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني صيانة طبية",
+      "required": 2,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني صيانة عامة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني كهرباء",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل تشهيلات",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "سائق",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 12,
+      "available": 10
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "مراسل",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى الشمال الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل مغسلة",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير التمريض",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المسؤول المالي",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "رئيس قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "اطباء النساء والتوليد",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الأطفال",
+      "jobTitle": "رئيس قسم الاطفال",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الأطفال",
+      "jobTitle": "اطباء قسم الأطفال",
+      "required": 7,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "رئيس قسم الجراحة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "طبيب باطنة",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "طبيب جراحة",
+      "required": 7,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "رئيس قسم الطوارئ",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "أطباء قسم الطوارئ",
+      "required": 9,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس قسم التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الطبية",
+      "department": "قسم التخدير",
+      "jobTitle": "أطباء قسم التخدير",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الاطفال",
+      "jobTitle": "حكيم قسم الأطفال",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الاطفال",
+      "jobTitle": "حكيم",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "رئيس فنيي التخدير",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التخدير",
+      "jobTitle": "فني تخدير",
+      "required": 5,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "حكيم قسم النساء والتوليد",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم النساء والتوليد",
+      "jobTitle": "قابلة قانونيه",
+      "required": 11,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم قسم العمليات",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم العمليات",
+      "jobTitle": "حكيم",
+      "required": 6,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم قسم الجراحة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الجراحة",
+      "jobTitle": "حكيم",
+      "required": 8,
+      "available": 8
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم قسم الطوارئ",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة التمريضية",
+      "department": "قسم الطوارئ",
+      "jobTitle": "حكيم",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "رئيس قسم الصيدلية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصيدلية الداخلية",
+      "jobTitle": "صيدلي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم جراحة العيون",
+      "jobTitle": "أخصائي بصريات",
+      "required": 0,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "رئيس قسم مختبر",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 7,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "فنيو أشعة",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "كاتب حسابات",
+      "required": 6,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "رئيس قسم شؤون المرضى",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 6,
+      "available": 6
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الأرشيف الطبي",
+      "jobTitle": "موظف ارشيف طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الخدمات الفنية",
+      "jobTitle": "فني غازات طبية",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني كهرباء",
+      "required": 5,
+      "available": 5
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "عامل تشهيلات",
+      "required": 2,
+      "available": 2
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "سائق",
+      "required": 4,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى المواصي الميداني",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 16,
+      "available": 16
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير مستشفى",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "مدير طبي",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "إدارة المستشفى",
+      "department": "الإدارة",
+      "jobTitle": "المدير الإداري",
+      "required": 1,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الطبية",
+      "department": "قسم التأهيل الطبي",
+      "jobTitle": "طبيب",
+      "required": 9,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة التمريضية",
+      "department": "أقسام الباطنة",
+      "jobTitle": "حكيم",
+      "required": 24,
+      "available": 15
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الصحة النفسية",
+      "jobTitle": "أخصائي نفسي",
+      "required": 4,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم المختبر",
+      "jobTitle": "فنيو مختبر",
+      "required": 3,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم الأشعة",
+      "jobTitle": "رئيس قسم الأشعة",
+      "required": 3,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي العلاج الطبيعي",
+      "required": 20,
+      "available": 14
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "أخصائي علاج وظيفي",
+      "required": 10,
+      "available": 7
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الفنية المساندة",
+      "department": "قسم التأهيل",
+      "jobTitle": "علاج نطق",
+      "required": 6,
+      "available": 3
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية",
+      "department": "قسم الإدارة",
+      "jobTitle": "المناوب الإداري",
+      "required": 5,
+      "available": 4
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية",
+      "department": "قسم المالية",
+      "jobTitle": "محاسب",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون موظفين",
+      "jobTitle": "شئون موظفين",
+      "required": 1,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية",
+      "department": "قسم شئون مرضى",
+      "jobTitle": "موظف شئون مرضى",
+      "required": 2,
+      "available": 1
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "قسم الصيانة العامة والكهرباء",
+      "jobTitle": "فني صيانة عامة",
+      "required": 4,
+      "available": 0
+    },
+    {
+      "hospital": "مستشفى التأهيل الطبي",
+      "division": "الدائرة الإدارية المساندة",
+      "department": "الخدمات المساندة",
+      "jobTitle": "حارس",
+      "required": 6,
+      "available": 6
+    }
+  ]
+}

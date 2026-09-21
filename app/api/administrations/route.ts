@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";
+import { getRawDb } from "@/db";
+export async function POST(req:Request){try{const b=await req.json();const hospitalId=Number(b.hospitalId),name=String(b.name||"").trim();if(!Number.isInteger(hospitalId)||hospitalId<1||name.length<2)return NextResponse.json({error:"اختر المركز وأدخل اسم الإدارة"},{status:400});const r=await getRawDb().prepare("INSERT INTO administrations (hospital_id,name) VALUES (?,?)").bind(hospitalId,name).run();return NextResponse.json({id:r.meta.last_row_id,hospitalId,name},{status:201})}catch(e){console.error(e);return NextResponse.json({error:"الإدارة موجودة مسبقًا أو تعذر الحفظ"},{status:409})}}

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789978061058,
+      "tag": "0000_thick_manta",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1789978721871,
+      "tag": "0001_solid_doctor_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789997935419,
+      "tag": "0002_real_maximus",
+      "breakpoints": true
+    }
+  ]
+}
