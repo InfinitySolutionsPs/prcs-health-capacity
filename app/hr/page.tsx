@@ -28,6 +28,7 @@ type D = {
   statuses: any[];
   cadres: any[];
   payroll: any;
+  jobCodes: any[];
 };
 const n = new Intl.NumberFormat("en-US");
 const txt = (v: any) => (v == null ? "" : String(v).trim());
@@ -49,7 +50,10 @@ export default function HR() {
 export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [newName, setNewName] = useState(""),
+    [newFacility, setNewFacility] = useState(""),
+    [newJobCode, setNewJobCode] = useState("");
   const load = useCallback(async () => {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}`);
     if (r.ok) setData(await r.json());
@@ -133,10 +137,49 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       setBusy(false);
     }
   }
+  async function uploadUnified(file: File) {
+    try {
+      setBusy(true);
+      const wb = XLSX.read(await file.arrayBuffer(), { cellDates: true });
+      const employeeSheet = wb.Sheets["الموظفون"];
+      const payrollSheet = wb.Sheets["الرواتب والمشاريع"];
+      if (!employeeSheet || !payrollSheet)
+        throw new Error("الملف الموحّد يجب أن يحتوي ورقتي الموظفون والرواتب والمشاريع");
+      const employees = (XLSX.utils.sheet_to_json(employeeSheet) as any[]).map((r) => ({
+        employeeNo: txt(r["رقم الموظف الأصلي"]), employeeCode: txt(r["كود الموظف"]), jobCode: txt(r["كود المسمى"]), categoryCode: txt(r["كود الدائرة الرئيسية"]), mainAdministration: txt(r["الدائرة الرئيسية"]), fullName: txt(r["اسم الموظف"]), nationalId: txt(r["رقم الهوية"]), gender: txt(r["الجنس"]), birthDate: iso(r["تاريخ الميلاد"]), cadreType: txt(r["نوع الكادر"]), phone: txt(r["الجوال"]), maritalStatus: txt(r["الحالة الاجتماعية"]), hireDate: iso(r["تاريخ التعيين"]), jobTitle: txt(r["المسمى الوظيفي"]), facility: txt(r["مركز العمل"]), administration: txt(r["الدائرة الأصلية"]), department: txt(r["القسم"]), qualification: txt(r["المؤهل العلمي"]), specialty: txt(r["التخصص"]), governorate: txt(r["المحافظة"]), city: txt(r["المدينة"]), contractStart: iso(r["بداية العقد"]), contractEnd: iso(r["نهاية العقد"]), endReason: txt(r["سبب نهاية الخدمة"]), endDate: iso(r["تاريخ نهاية الخدمة"]), status: txt(r["حالة الموظف"]), dualWorkplace: txt(r["مكان العمل المزدوج"]),
+      })).filter((r) => r.employeeNo && r.fullName);
+      const payroll = (XLSX.utils.sheet_to_json(payrollSheet) as any[]).map((r) => ({
+        employeeNo: txt(r["رقم الموظف الأصلي"]), employeeName: txt(r["اسم الموظف"]), period: txt(r["الفترة"]), project: txt(r["المشروع"]), facility: txt(r["المركز"]), administration: txt(r["الدائرة"]), gross: Number(r["الإجمالي الكلي (شيكل)"] || 0), deductions: Number(r["إجمالي الخصم (شيكل)"] || 0), net: Number(r["الصافي (شيكل)"] || 0),
+      })).filter((r) => r.employeeNo && r.project);
+      for (const [type, rows] of [["employees", employees], ["payroll", payroll]] as const)
+        for (let i = 0; i < rows.length; i += 300) {
+          const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, rows: rows.slice(i, i + 300) }) });
+          if (!res.ok) throw new Error((await res.json()).error || "فشل الاستيراد");
+        }
+      toast.success(`تم استيراد ${n.format(employees.length)} موظف و${n.format(payroll.length)} سجل راتب`);
+      await load();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "فشل استيراد الملف الموحّد"); }
+    finally { setBusy(false); }
+  }
+  async function addEmployee(e: React.FormEvent) {
+    e.preventDefault();
+    const job = data?.jobCodes?.find((j) => j.jobCode === newJobCode);
+    if (!job) return;
+    try {
+      setBusy(true);
+      const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "employee", row: { fullName: newName, facility: newFacility, ...job } }) });
+      const result = await res.json(); if (!res.ok) throw new Error(result.error || "تعذر إضافة الموظف");
+      toast.success(`تمت الإضافة بالكود ${result.employeeCode}`); setNewName(""); setNewFacility(""); setNewJobCode(""); await load();
+    } catch (e) { toast.error(e instanceof Error ? e.message : "تعذر إضافة الموظف"); } finally { setBusy(false); }
+  }
   return (
     <main
       dir="rtl"
-      className={embedded ? "text-right" : "min-h-screen bg-[#f3f6f8] p-4 text-right lg:p-8"}
+      className={
+        embedded
+          ? "text-right"
+          : "min-h-screen bg-[#f3f6f8] p-4 text-right lg:p-8"
+      }
     >
       <div className="mx-auto max-w-[1500px]">
         <div className="mb-5 flex items-center justify-between">
@@ -168,6 +211,9 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <Card t="إجمالي الرواتب" v={data?.payroll?.gross} money />
         </section>
         <section className="mb-5 grid gap-4 rounded-2xl border bg-white p-5 lg:grid-cols-2">
+          <div className="lg:col-span-2">
+            <ImportBox title="استيراد الملف الموحّد للموظفين والرواتب" note="يستورد الموظفين والأكواد والرواتب والمشاريع من ملف واحد" onFile={uploadUnified} busy={busy} />
+          </div>
           <ImportBox
             title="استيراد ملف الموظفين"
             note="اختر ملف بيانات الموظفين الرئيسي"
@@ -181,6 +227,13 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             busy={busy}
           />
         </section>
+        <form onSubmit={addEmployee} className="mb-5 grid gap-3 rounded-2xl border bg-white p-5 md:grid-cols-3">
+          <div className="md:col-span-3"><h2 className="font-bold">إضافة موظف جديد</h2><p className="mt-1 text-sm text-[#6b7681]">يولّد النظام رقم الموظف تلقائياً تحت كود المسمى المختار.</p></div>
+          <Input value={newName} onChange={(e)=>setNewName(e.target.value)} placeholder="اسم الموظف الكامل" className="text-right" />
+          <Input value={newFacility} onChange={(e)=>setNewFacility(e.target.value)} placeholder="مركز العمل" className="text-right" />
+          <select value={newJobCode} onChange={(e)=>setNewJobCode(e.target.value)} className="h-10 rounded-md border bg-white px-3 text-right"><option value="">اختر المسمى الوظيفي</option>{data?.jobCodes?.map((j)=><option key={j.jobCode} value={j.jobCode}>{j.mainAdministration} — {j.jobTitle} ({j.jobCode})</option>)}</select>
+          <Button disabled={busy||newName.trim().length<2||!newJobCode} className="md:col-span-3 bg-[#a50f27]">إضافة وتوليد الكود</Button>
+        </form>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
           <Breakdown title="الموظفون حسب المركز" rows={data?.facilities} />
           <Breakdown title="حسب حالة الموظف" rows={data?.statuses} />
@@ -204,6 +257,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right">الرقم</TableHead>
+                  <TableHead className="text-right">كود الموظف</TableHead>
                   <TableHead className="text-right">اسم الموظف</TableHead>
                   <TableHead className="text-right">المركز</TableHead>
                   <TableHead className="text-right">الدائرة</TableHead>
@@ -217,6 +271,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                 {data?.employees?.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell>{e.employee_no}</TableCell>
+                    <TableCell dir="ltr" className="text-right font-mono">{e.employee_code || "—"}</TableCell>
                     <TableCell className="font-semibold">
                       {e.full_name}
                     </TableCell>
