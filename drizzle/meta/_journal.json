@@ -29,6 +29,13 @@
       "when": 1790017046007,
       "tag": "0003_equal_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790061916044,
+      "tag": "0004_free_namorita",
+      "breakpoints": true
     }
   ]
 }

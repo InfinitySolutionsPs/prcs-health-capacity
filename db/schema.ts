@@ -57,3 +57,23 @@ export const systemUsers=sqliteTable("system_users",{
   uniqueIndex("idx_system_users_email").on(t.email),
   uniqueIndex("idx_system_users_auth_user_id").on(t.authUserId),
 ]);
+
+export const employees=sqliteTable("employees",{
+  id:integer("id").primaryKey({autoIncrement:true}),
+  employeeNo:text("employee_no").notNull(),
+  fullName:text("full_name").notNull(),
+  nationalId:text("national_id"), gender:text("gender"), birthDate:text("birth_date"),
+  cadreType:text("cadre_type"), phone:text("phone"), maritalStatus:text("marital_status"), hireDate:text("hire_date"),
+  jobTitle:text("job_title").notNull(), facility:text("facility").notNull(), administration:text("administration"), department:text("department"),
+  qualification:text("qualification"), specialty:text("specialty"), governorate:text("governorate"), city:text("city"),
+  contractStart:text("contract_start"), contractEnd:text("contract_end"), endReason:text("end_reason"), endDate:text("end_date"),
+  status:text("status").notNull().default("على رأس عمله"), dualWorkplace:text("dual_workplace"),
+  createdAt:text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`), updatedAt:text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+},t=>[uniqueIndex("idx_employees_employee_no").on(t.employeeNo)]);
+
+export const payrollEntries=sqliteTable("payroll_entries",{
+  id:integer("id").primaryKey({autoIncrement:true}), employeeNo:text("employee_no").notNull(), employeeName:text("employee_name").notNull(),
+  period:text("period").notNull(), project:text("project").notNull(), facility:text("facility"), administration:text("administration"),
+  gross:text("gross").notNull().default("0"), deductions:text("deductions").notNull().default("0"), net:text("net").notNull().default("0"),
+  createdAt:text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+},t=>[uniqueIndex("idx_payroll_employee_period_project").on(t.employeeNo,t.period,t.project)]);
