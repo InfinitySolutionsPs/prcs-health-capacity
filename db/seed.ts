@@ -1,6 +1,6 @@
 import seedData from "./seed-data.json";
-import employeeSeedPart1 from "./employee-seed-1.json";
-import employeeSeedPart2 from "./employee-seed-2.json";
+import fs from "node:fs";
+import path from "node:path";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
@@ -100,10 +100,15 @@ async function ensureEmployeeSeed(){
   const db=getRawDb();
   const existing=await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
   if((existing?.count||0)>0)return;
-  const records=[
-    ...(Array.isArray(employeeSeedPart1.records)?employeeSeedPart1.records:[]),
-    ...(Array.isArray(employeeSeedPart2.records)?employeeSeedPart2.records:[]),
-  ];
+  // Read the large employee seed files at runtime. Keeping them out of the
+  // build graph prevents Docker/BuildKit memory spikes while preserving
+  // automatic seeding on a fresh deployment.
+  const records=(['employee-seed-1.json','employee-seed-2.json'] as const).flatMap(file=>{
+    try {
+      const parsed=JSON.parse(fs.readFileSync(path.join(process.cwd(),'db',file),'utf8'));
+      return Array.isArray(parsed?.records)?parsed.records:[];
+    } catch { return []; }
+  });
   for(let i=0;i<records.length;i+=50){
     await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
       employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
