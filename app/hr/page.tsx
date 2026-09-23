@@ -50,6 +50,20 @@ const LOCATION_OPTIONS: Record<string,string[]> = {
 };
 const n = new Intl.NumberFormat("en-US");
 const txt = (v: any) => (v == null ? "" : String(v).trim());
+async function responseError(res: Response, fallback: string) {
+  const raw = await res.text();
+  if (!raw.trim()) return fallback;
+  try {
+    const body = JSON.parse(raw) as { error?: unknown };
+    return typeof body.error === "string" && body.error.trim()
+      ? body.error
+      : fallback;
+  } catch {
+    // Next/proxy errors can be returned as HTML or an empty body. Never mask
+    // the actual import failure with "Unexpected end of JSON input".
+    return raw.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 240) || fallback;
+  }
+}
 const iso = (v: any) => {
   if (!v) return "";
   if (v instanceof Date) return v.toISOString().slice(0, 10);
@@ -119,7 +133,7 @@ export function EmployeeImportView({ onImported }: { onImported?: () => Promise<
       if (!rows.length) throw new Error("لم يتم العثور على سجلات صالحة في الملف");
       for (let i = 0; i < rows.length; i += 300) {
         const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "employees", rows: rows.slice(i, i + 300) }) });
-        if (!res.ok) throw new Error((await res.json()).error || "فشل استيراد الموظفين");
+        if (!res.ok) throw new Error(await responseError(res, "فشل استيراد الموظفين"));
       }
       setResult(`تم استيراد ${n.format(rows.length)} موظف بنجاح`);
       toast.success(`تم استيراد ${n.format(rows.length)} موظف`);
@@ -216,7 +230,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           body: JSON.stringify({ type, rows: rows.slice(i, i + 300) }),
         });
         if (!res.ok)
-          throw new Error((await res.json()).error || "فشل الاستيراد");
+          throw new Error(await responseError(res, "فشل الاستيراد"));
       }
       toast.success(`تم استيراد ${n.format(rows.length)} سجل`);
       await load();
@@ -295,7 +309,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             body: JSON.stringify({ type, rows: rows.slice(i, i + 300) }),
           });
           if (!res.ok)
-            throw new Error((await res.json()).error || "فشل الاستيراد");
+            throw new Error(await responseError(res, "فشل الاستيراد"));
         }
       toast.success(
         `تم استيراد ${n.format(employees.length)} موظف و${n.format(payroll.length)} سجل راتب`,
