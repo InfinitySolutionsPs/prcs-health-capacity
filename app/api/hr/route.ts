@@ -60,13 +60,16 @@ export async function GET(req: Request) {
   });
 }
 export async function POST(req: Request) {
-  if (!(await requireRole(["admin"])))
+  const b = await req.json();
+  const allowed = b.type === "employee"
+    ? await requireRole(["admin", "editor"])
+    : await requireRole(["admin"]);
+  if (!allowed)
     return NextResponse.json(
-      { error: "الاستيراد متاح لمدير النظام فقط" },
+      { error: b.type === "employee" ? "إضافة الموظفين متاحة للمدير والمحرر فقط" : "الاستيراد متاح لمدير النظام فقط" },
       { status: 403 },
     );
-  const b = await req.json(),
-    db = getRawDb();
+  const db = getRawDb();
   if (b.type === "employees") {
     const rows = Array.isArray(b.rows) ? b.rows : [];
     for (let i = 0; i < rows.length; i += 80) {
