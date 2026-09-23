@@ -97,4 +97,3 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true, employeeCode });
 }
-
