@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     ? "WHERE full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?"
     : "";
   const args = q ? [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`] : [];
-  const [employees, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles] =
+  const [employees, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles, cadreTypes] =
     await Promise.all([
       db
         .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ?`)
@@ -54,6 +54,7 @@ export async function GET(req: Request) {
       db.prepare("SELECT a.id,a.hospital_id AS hospitalId,a.name,h.name AS hospitalName FROM administrations a JOIN hospitals h ON h.id=a.hospital_id ORDER BY h.name,a.name").all(),
       db.prepare("SELECT d.id,d.hospital_id AS hospitalId,d.administration_id AS administrationId,COALESCE(a.name,d.division) AS administration,d.name,h.name AS hospitalName FROM departments d JOIN hospitals h ON h.id=d.hospital_id LEFT JOIN administrations a ON a.id=d.administration_id ORDER BY h.name,administration,d.name").all(),
       db.prepare("SELECT id,name,active,main_administration AS mainAdministration,category_code AS categoryCode,job_code AS jobCode FROM job_titles WHERE active=1 ORDER BY name").all(),
+      db.prepare("SELECT id,name FROM cadre_types ORDER BY name").all(),
     ]);
   return NextResponse.json({
     employees: employees.results,
@@ -63,7 +64,7 @@ export async function GET(req: Request) {
     cadres: cadres.results,
     payroll,
     jobCodes: jobCodes.results,
-    settings: { hospitals: hospitals.results, administrations: administrations.results, departments: departments.results, jobTitles: jobTitles.results },
+    settings: { hospitals: hospitals.results, administrations: administrations.results, departments: departments.results, jobTitles: jobTitles.results, cadreTypes: cadreTypes.results },
   });
 }
 export async function POST(req: Request) {
@@ -233,3 +234,4 @@ export async function POST(req: Request) {
     { status: 400 },
   );
 }
+
