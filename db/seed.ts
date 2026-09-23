@@ -1,5 +1,6 @@
 import seedData from "./seed-data.json";
 import { getRawDb } from "./index";
+import { hashPassword } from "@/lib/password";
 
 const SEED_KEY="hospital_excel_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
@@ -8,6 +9,16 @@ const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد سا�
 
 export async function ensureEmployeeFields(){
   const db=getRawDb();
+  const userColumns=(await db.prepare("PRAGMA table_info(system_users)").all()).results as {name:string}[];
+  const userNames=new Set(userColumns.map(c=>c.name));
+  if(!userNames.has("username"))await db.prepare("ALTER TABLE system_users ADD COLUMN username TEXT").run();
+  if(!userNames.has("password_hash"))await db.prepare("ALTER TABLE system_users ADD COLUMN password_hash TEXT").run();
+  const userCount=await db.prepare("SELECT COUNT(*) AS count FROM system_users").first<{count:number}>();
+  if(!userCount?.count){
+    await db.prepare("INSERT INTO system_users (username,email,name,role,active,password_hash) VALUES (?,?,?,?,1,?)").bind("admin","admin@prcs.local","مدير النظام","admin",await hashPassword("admin123")).run();
+  }else{
+    await db.prepare("UPDATE system_users SET username=COALESCE(NULLIF(username,''),LOWER(email)) WHERE username IS NULL OR username='' ").run();
+  }
   await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
   await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
   await db.batch(DEFAULT_CADRE_TYPES.map(name=>db.prepare("INSERT OR IGNORE INTO cadre_types (name) VALUES (?)").bind(name)));
@@ -67,4 +78,3 @@ export async function ensureNormalizedSettings(){
   await db.prepare("INSERT OR IGNORE INTO job_titles (name) SELECT DISTINCT job_title FROM staffing WHERE TRIM(job_title)<>''").run();
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j WHERE j.name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL").run();
 }
-
