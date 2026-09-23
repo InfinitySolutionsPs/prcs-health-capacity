@@ -4,13 +4,24 @@ import * as XLSX from "xlsx";
 import {
   ArrowRight,
   FileSpreadsheet,
+  Pencil,
   Search,
   Upload,
+  UserPlus,
   Users,
   WalletCards,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -50,10 +61,7 @@ export default function HR() {
 export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
-    [busy, setBusy] = useState(false),
-    [newName, setNewName] = useState(""),
-    [newFacility, setNewFacility] = useState(""),
-    [newJobCode, setNewJobCode] = useState("");
+    [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}`);
     if (r.ok) setData(await r.json());
@@ -144,33 +152,75 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       const employeeSheet = wb.Sheets["الموظفون"];
       const payrollSheet = wb.Sheets["الرواتب والمشاريع"];
       if (!employeeSheet || !payrollSheet)
-        throw new Error("الملف الموحّد يجب أن يحتوي ورقتي الموظفون والرواتب والمشاريع");
-      const employees = (XLSX.utils.sheet_to_json(employeeSheet) as any[]).map((r) => ({
-        employeeNo: txt(r["رقم الموظف الأصلي"]), employeeCode: txt(r["كود الموظف"]), jobCode: txt(r["كود المسمى"]), categoryCode: txt(r["كود الدائرة الرئيسية"]), mainAdministration: txt(r["الدائرة الرئيسية"]), fullName: txt(r["اسم الموظف"]), nationalId: txt(r["رقم الهوية"]), gender: txt(r["الجنس"]), birthDate: iso(r["تاريخ الميلاد"]), cadreType: txt(r["نوع الكادر"]), phone: txt(r["الجوال"]), maritalStatus: txt(r["الحالة الاجتماعية"]), hireDate: iso(r["تاريخ التعيين"]), jobTitle: txt(r["المسمى الوظيفي"]), facility: txt(r["مركز العمل"]), administration: txt(r["الدائرة الأصلية"]), department: txt(r["القسم"]), qualification: txt(r["المؤهل العلمي"]), specialty: txt(r["التخصص"]), governorate: txt(r["المحافظة"]), city: txt(r["المدينة"]), contractStart: iso(r["بداية العقد"]), contractEnd: iso(r["نهاية العقد"]), endReason: txt(r["سبب نهاية الخدمة"]), endDate: iso(r["تاريخ نهاية الخدمة"]), status: txt(r["حالة الموظف"]), dualWorkplace: txt(r["مكان العمل المزدوج"]),
-      })).filter((r) => r.employeeNo && r.fullName);
-      const payroll = (XLSX.utils.sheet_to_json(payrollSheet) as any[]).map((r) => ({
-        employeeNo: txt(r["رقم الموظف الأصلي"]), employeeName: txt(r["اسم الموظف"]), period: txt(r["الفترة"]), project: txt(r["المشروع"]), facility: txt(r["المركز"]), administration: txt(r["الدائرة"]), gross: Number(r["الإجمالي الكلي (شيكل)"] || 0), deductions: Number(r["إجمالي الخصم (شيكل)"] || 0), net: Number(r["الصافي (شيكل)"] || 0),
-      })).filter((r) => r.employeeNo && r.project);
-      for (const [type, rows] of [["employees", employees], ["payroll", payroll]] as const)
+        throw new Error(
+          "الملف الموحّد يجب أن يحتوي ورقتي الموظفون والرواتب والمشاريع",
+        );
+      const employees = (XLSX.utils.sheet_to_json(employeeSheet) as any[])
+        .map((r) => ({
+          employeeNo: txt(r["رقم الموظف الأصلي"]),
+          employeeCode: txt(r["كود الموظف"]),
+          jobCode: txt(r["كود المسمى"]),
+          categoryCode: txt(r["كود الدائرة الرئيسية"]),
+          mainAdministration: txt(r["الدائرة الرئيسية"]),
+          fullName: txt(r["اسم الموظف"]),
+          nationalId: txt(r["رقم الهوية"]),
+          gender: txt(r["الجنس"]),
+          birthDate: iso(r["تاريخ الميلاد"]),
+          cadreType: txt(r["نوع الكادر"]),
+          phone: txt(r["الجوال"]),
+          maritalStatus: txt(r["الحالة الاجتماعية"]),
+          hireDate: iso(r["تاريخ التعيين"]),
+          jobTitle: txt(r["المسمى الوظيفي"]),
+          facility: txt(r["مركز العمل"]),
+          administration: txt(r["الدائرة الأصلية"]),
+          department: txt(r["القسم"]),
+          qualification: txt(r["المؤهل العلمي"]),
+          specialty: txt(r["التخصص"]),
+          governorate: txt(r["المحافظة"]),
+          city: txt(r["المدينة"]),
+          contractStart: iso(r["بداية العقد"]),
+          contractEnd: iso(r["نهاية العقد"]),
+          endReason: txt(r["سبب نهاية الخدمة"]),
+          endDate: iso(r["تاريخ نهاية الخدمة"]),
+          status: txt(r["حالة الموظف"]),
+          dualWorkplace: txt(r["مكان العمل المزدوج"]),
+        }))
+        .filter((r) => r.employeeNo && r.fullName);
+      const payroll = (XLSX.utils.sheet_to_json(payrollSheet) as any[])
+        .map((r) => ({
+          employeeNo: txt(r["رقم الموظف الأصلي"]),
+          employeeName: txt(r["اسم الموظف"]),
+          period: txt(r["الفترة"]),
+          project: txt(r["المشروع"]),
+          facility: txt(r["المركز"]),
+          administration: txt(r["الدائرة"]),
+          gross: Number(r["الإجمالي الكلي (شيكل)"] || 0),
+          deductions: Number(r["إجمالي الخصم (شيكل)"] || 0),
+          net: Number(r["الصافي (شيكل)"] || 0),
+        }))
+        .filter((r) => r.employeeNo && r.project);
+      for (const [type, rows] of [
+        ["employees", employees],
+        ["payroll", payroll],
+      ] as const)
         for (let i = 0; i < rows.length; i += 300) {
-          const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type, rows: rows.slice(i, i + 300) }) });
-          if (!res.ok) throw new Error((await res.json()).error || "فشل الاستيراد");
+          const res = await fetch("/api/hr", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, rows: rows.slice(i, i + 300) }),
+          });
+          if (!res.ok)
+            throw new Error((await res.json()).error || "فشل الاستيراد");
         }
-      toast.success(`تم استيراد ${n.format(employees.length)} موظف و${n.format(payroll.length)} سجل راتب`);
+      toast.success(
+        `تم استيراد ${n.format(employees.length)} موظف و${n.format(payroll.length)} سجل راتب`,
+      );
       await load();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "فشل استيراد الملف الموحّد"); }
-    finally { setBusy(false); }
-  }
-  async function addEmployee(e: React.FormEvent) {
-    e.preventDefault();
-    const job = data?.jobCodes?.find((j) => j.jobCode === newJobCode);
-    if (!job) return;
-    try {
-      setBusy(true);
-      const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "employee", row: { fullName: newName, facility: newFacility, ...job } }) });
-      const result = await res.json(); if (!res.ok) throw new Error(result.error || "تعذر إضافة الموظف");
-      toast.success(`تمت الإضافة بالكود ${result.employeeCode}`); setNewName(""); setNewFacility(""); setNewJobCode(""); await load();
-    } catch (e) { toast.error(e instanceof Error ? e.message : "تعذر إضافة الموظف"); } finally { setBusy(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "فشل استيراد الملف الموحّد");
+    } finally {
+      setBusy(false);
+    }
   }
   return (
     <main
@@ -182,7 +232,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       }
     >
       <div className="mx-auto max-w-[1500px]">
-        <div className="mb-5 flex items-center justify-between">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-extrabold">
               الموظفون والموارد البشرية
@@ -191,16 +241,19 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               سجل الموظفين والإحصائيات والرواتب والمشاريع
             </p>
           </div>
-          {!embedded && (
-            <a
-              href="/"
-              target="_top"
-              className="flex items-center gap-2 text-[#a50f27]"
-            >
-              <ArrowRight />
-              القدرة التشغيلية
-            </a>
-          )}
+          <div className="flex items-center gap-3">
+            <EmployeeDialog jobCodes={data?.jobCodes || []} onSaved={load} />
+            {!embedded && (
+              <a
+                href="/"
+                target="_top"
+                className="flex items-center gap-2 text-[#a50f27]"
+              >
+                <ArrowRight />
+                القدرة التشغيلية
+              </a>
+            )}
+          </div>
         </div>
         <section className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-6">
           <Card t="كل الموظفين" v={data?.summary?.total} />
@@ -212,7 +265,12 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
         </section>
         <section className="mb-5 grid gap-4 rounded-2xl border bg-white p-5 lg:grid-cols-2">
           <div className="lg:col-span-2">
-            <ImportBox title="استيراد الملف الموحّد للموظفين والرواتب" note="يستورد الموظفين والأكواد والرواتب والمشاريع من ملف واحد" onFile={uploadUnified} busy={busy} />
+            <ImportBox
+              title="استيراد الملف الموحّد للموظفين والرواتب"
+              note="يستورد الموظفين والأكواد والرواتب والمشاريع من ملف واحد"
+              onFile={uploadUnified}
+              busy={busy}
+            />
           </div>
           <ImportBox
             title="استيراد ملف الموظفين"
@@ -227,13 +285,6 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             busy={busy}
           />
         </section>
-        <form onSubmit={addEmployee} className="mb-5 grid gap-3 rounded-2xl border bg-white p-5 md:grid-cols-3">
-          <div className="md:col-span-3"><h2 className="font-bold">إضافة موظف جديد</h2><p className="mt-1 text-sm text-[#6b7681]">يولّد النظام رقم الموظف تلقائياً تحت كود المسمى المختار.</p></div>
-          <Input value={newName} onChange={(e)=>setNewName(e.target.value)} placeholder="اسم الموظف الكامل" className="text-right" />
-          <Input value={newFacility} onChange={(e)=>setNewFacility(e.target.value)} placeholder="مركز العمل" className="text-right" />
-          <select value={newJobCode} onChange={(e)=>setNewJobCode(e.target.value)} className="h-10 rounded-md border bg-white px-3 text-right"><option value="">اختر المسمى الوظيفي</option>{data?.jobCodes?.map((j)=><option key={j.jobCode} value={j.jobCode}>{j.mainAdministration} — {j.jobTitle} ({j.jobCode})</option>)}</select>
-          <Button disabled={busy||newName.trim().length<2||!newJobCode} className="md:col-span-3 bg-[#a50f27]">إضافة وتوليد الكود</Button>
-        </form>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
           <Breakdown title="الموظفون حسب المركز" rows={data?.facilities} />
           <Breakdown title="حسب حالة الموظف" rows={data?.statuses} />
@@ -265,13 +316,16 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
+                  <TableHead className="text-right">تعديل</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data?.employees?.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell>{e.employee_no}</TableCell>
-                    <TableCell dir="ltr" className="text-right font-mono">{e.employee_code || "—"}</TableCell>
+                    <TableCell dir="ltr" className="text-right font-mono">
+                      {e.employee_code || "—"}
+                    </TableCell>
                     <TableCell className="font-semibold">
                       {e.full_name}
                     </TableCell>
@@ -281,6 +335,13 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
                     <TableCell>{e.status}</TableCell>
+                    <TableCell>
+                      <EmployeeDialog
+                        employee={e}
+                        jobCodes={data?.jobCodes || []}
+                        onSaved={load}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -350,5 +411,454 @@ function Breakdown({ title, rows = [] }: { title: string; rows?: any[] }) {
         ))}
       </div>
     </div>
+  );
+}
+
+const emptyEmployee = {
+  firstName: "",
+  fatherName: "",
+  grandfatherName: "",
+  familyName: "",
+  nationalId: "",
+  gender: "",
+  birthDate: "",
+  cadreType: "",
+  phone: "",
+  maritalStatus: "",
+  hireDate: "",
+  jobCode: "",
+  jobTitle: "",
+  categoryCode: "",
+  mainAdministration: "",
+  facility: "",
+  administration: "",
+  department: "",
+  qualification: "",
+  specialty: "",
+  governorate: "",
+  city: "",
+  contractStart: "",
+  contractEnd: "",
+  endReason: "",
+  endDate: "",
+  status: "على رأس عمله",
+  dualWorkplace: "",
+};
+
+function employeeForm(employee?: any) {
+  if (!employee) return { ...emptyEmployee };
+  const parts = txt(employee.full_name).split(/\s+/).filter(Boolean);
+  return {
+    firstName: employee.first_name || parts[0] || "",
+    fatherName: employee.father_name || parts[1] || "",
+    grandfatherName: employee.grandfather_name || parts[2] || "",
+    familyName: employee.family_name || parts.slice(3).join(" ") || "",
+    nationalId: employee.national_id || "",
+    gender: employee.gender || "",
+    birthDate: employee.birth_date || "",
+    cadreType: employee.cadre_type || "",
+    phone: employee.phone || "",
+    maritalStatus: employee.marital_status || "",
+    hireDate: employee.hire_date || "",
+    jobCode: employee.job_code || "",
+    jobTitle: employee.job_title || "",
+    categoryCode: employee.category_code || "",
+    mainAdministration: employee.main_administration || "",
+    facility: employee.facility || "",
+    administration: employee.administration || "",
+    department: employee.department || "",
+    qualification: employee.qualification || "",
+    specialty: employee.specialty || "",
+    governorate: employee.governorate || "",
+    city: employee.city || "",
+    contractStart: employee.contract_start || "",
+    contractEnd: employee.contract_end || "",
+    endReason: employee.end_reason || "",
+    endDate: employee.end_date || "",
+    status: employee.status || "على رأس عمله",
+    dualWorkplace: employee.dual_workplace || "",
+  };
+}
+
+function EmployeeDialog({
+  employee,
+  jobCodes,
+  onSaved,
+}: {
+  employee?: any;
+  jobCodes: any[];
+  onSaved: () => Promise<void>;
+}) {
+  const editing = Boolean(employee?.id);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(() => employeeForm(employee));
+  const set = (key: string, value: string) =>
+    setForm((current) => ({ ...current, [key]: value }));
+
+  function changeJob(jobCode: string) {
+    const job = jobCodes.find((item) => item.jobCode === jobCode);
+    setForm((current) => ({
+      ...current,
+      jobCode,
+      jobTitle: job?.jobTitle || "",
+      categoryCode: job?.categoryCode || "",
+      mainAdministration: job?.mainAdministration || "",
+    }));
+  }
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      const res = await fetch(editing ? `/api/hr/${employee.id}` : "/api/hr", {
+        method: editing ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editing ? form : { type: "employee", row: form }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "تعذر حفظ بيانات الموظف");
+      toast.success(
+        editing
+          ? "تم تحديث بيانات الموظف"
+          : `تمت إضافة الموظف بالكود ${result.employeeCode}`,
+      );
+      setOpen(false);
+      if (!editing) setForm({ ...emptyEmployee });
+      await onSaved();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "تعذر حفظ بيانات الموظف",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const validName = [
+    form.firstName,
+    form.fatherName,
+    form.grandfatherName,
+    form.familyName,
+  ].every((part) => part.trim());
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setForm(employeeForm(employee));
+      }}
+    >
+      <DialogTrigger asChild>
+        {editing ? (
+          <Button variant="ghost" size="icon" title="تعديل الموظف">
+            <Pencil className="size-4" />
+          </Button>
+        ) : (
+          <Button className="gap-2 bg-[#a50f27] hover:bg-[#870c20]">
+            <UserPlus className="size-5" />
+            إضافة موظف
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent
+        dir="rtl"
+        className="max-h-[92vh] overflow-y-auto text-right sm:max-w-5xl"
+      >
+        <DialogHeader className="text-right sm:text-right">
+          <DialogTitle>
+            {editing ? "تعديل بيانات الموظف" : "إضافة موظف جديد"}
+          </DialogTitle>
+          <DialogDescription>
+            أدخل البيانات كاملة. يولّد النظام كود الموظف تلقائياً وفق المسمى
+            الوظيفي.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={save} className="space-y-5">
+          {editing && (
+            <div className="grid gap-3 rounded-xl bg-[#f7f9fa] p-3 sm:grid-cols-2">
+              <ReadOnly label="رقم الموظف" value={employee.employee_no} />
+              <ReadOnly
+                label="كود الموظف"
+                value={employee.employee_code || "يولّد عند الحفظ"}
+              />
+            </div>
+          )}
+
+          <FieldGroup title="الاسم الرباعي" className="sm:grid-cols-4">
+            <Field
+              label="الاسم الأول *"
+              value={form.firstName}
+              onChange={(v) => set("firstName", v)}
+            />
+            <Field
+              label="اسم الأب *"
+              value={form.fatherName}
+              onChange={(v) => set("fatherName", v)}
+            />
+            <Field
+              label="اسم الجد *"
+              value={form.grandfatherName}
+              onChange={(v) => set("grandfatherName", v)}
+            />
+            <Field
+              label="اسم العائلة *"
+              value={form.familyName}
+              onChange={(v) => set("familyName", v)}
+            />
+          </FieldGroup>
+
+          <FieldGroup
+            title="البيانات الشخصية"
+            className="sm:grid-cols-3 lg:grid-cols-4"
+          >
+            <Field
+              label="رقم الهوية"
+              value={form.nationalId}
+              onChange={(v) => set("nationalId", v)}
+            />
+            <Choice
+              label="الجنس"
+              value={form.gender}
+              onChange={(v) => set("gender", v)}
+              options={["ذكر", "أنثى"]}
+            />
+            <Field
+              label="تاريخ الميلاد"
+              type="date"
+              value={form.birthDate}
+              onChange={(v) => set("birthDate", v)}
+            />
+            <Field
+              label="رقم الجوال"
+              type="tel"
+              value={form.phone}
+              onChange={(v) => set("phone", v)}
+            />
+            <Choice
+              label="الحالة الاجتماعية"
+              value={form.maritalStatus}
+              onChange={(v) => set("maritalStatus", v)}
+              options={["أعزب", "متزوج", "مطلق", "أرمل"]}
+            />
+            <Field
+              label="المحافظة"
+              value={form.governorate}
+              onChange={(v) => set("governorate", v)}
+            />
+            <Field
+              label="المدينة"
+              value={form.city}
+              onChange={(v) => set("city", v)}
+            />
+          </FieldGroup>
+
+          <FieldGroup
+            title="البيانات الوظيفية"
+            className="sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <label className="space-y-1.5 lg:col-span-2">
+              <span className="block text-sm font-medium">
+                المسمى الوظيفي *
+              </span>
+              <select
+                value={form.jobCode}
+                onChange={(e) => changeJob(e.target.value)}
+                className="h-10 w-full rounded-md border bg-white px-3 text-right"
+              >
+                <option value="">اختر المسمى الوظيفي</option>
+                {jobCodes.map((job) => (
+                  <option key={job.jobCode} value={job.jobCode}>
+                    {job.mainAdministration} — {job.jobTitle} ({job.jobCode})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <ReadOnly
+              label="الدائرة الرئيسية"
+              value={form.mainAdministration || "تُحدد من المسمى"}
+            />
+            <Field
+              label="مركز العمل"
+              value={form.facility}
+              onChange={(v) => set("facility", v)}
+            />
+            <Field
+              label="الدائرة"
+              value={form.administration}
+              onChange={(v) => set("administration", v)}
+            />
+            <Field
+              label="القسم"
+              value={form.department}
+              onChange={(v) => set("department", v)}
+            />
+            <Field
+              label="نوع الكادر"
+              value={form.cadreType}
+              onChange={(v) => set("cadreType", v)}
+            />
+            <Field
+              label="تاريخ التعيين"
+              type="date"
+              value={form.hireDate}
+              onChange={(v) => set("hireDate", v)}
+            />
+            <Choice
+              label="حالة الموظف"
+              value={form.status}
+              onChange={(v) => set("status", v)}
+              options={[
+                "على رأس عمله",
+                "موقوف",
+                "منتهية خدماته",
+                "إجازة بدون راتب",
+              ]}
+            />
+            <Field
+              label="المؤهل العلمي"
+              value={form.qualification}
+              onChange={(v) => set("qualification", v)}
+            />
+            <Field
+              label="التخصص"
+              value={form.specialty}
+              onChange={(v) => set("specialty", v)}
+            />
+            <Field
+              label="مكان العمل المزدوج"
+              value={form.dualWorkplace}
+              onChange={(v) => set("dualWorkplace", v)}
+            />
+          </FieldGroup>
+
+          <FieldGroup
+            title="بيانات العقد ونهاية الخدمة"
+            className="sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <Field
+              label="بداية العقد"
+              type="date"
+              value={form.contractStart}
+              onChange={(v) => set("contractStart", v)}
+            />
+            <Field
+              label="نهاية العقد"
+              type="date"
+              value={form.contractEnd}
+              onChange={(v) => set("contractEnd", v)}
+            />
+            <Field
+              label="سبب نهاية الخدمة"
+              value={form.endReason}
+              onChange={(v) => set("endReason", v)}
+            />
+            <Field
+              label="تاريخ نهاية الخدمة"
+              type="date"
+              value={form.endDate}
+              onChange={(v) => set("endDate", v)}
+            />
+          </FieldGroup>
+
+          <DialogFooter className="sticky bottom-0 border-t bg-white pt-4 sm:justify-start">
+            <Button
+              type="submit"
+              disabled={saving || !validName || !form.jobCode}
+              className="bg-[#a50f27] hover:bg-[#870c20]"
+            >
+              {saving
+                ? "جارٍ الحفظ..."
+                : editing
+                  ? "حفظ التعديلات"
+                  : "إضافة الموظف وتوليد الكود"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FieldGroup({
+  title,
+  className,
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <fieldset className="rounded-xl border p-4">
+      <legend className="px-2 font-bold text-[#a50f27]">{title}</legend>
+      <div className={`grid gap-3 ${className || ""}`}>{children}</div>
+    </fieldset>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
+  return (
+    <label className="space-y-1.5">
+      <span className="block text-sm font-medium">{label}</span>
+      <Input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="text-right"
+      />
+    </label>
+  );
+}
+
+function Choice({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+}) {
+  return (
+    <label className="space-y-1.5">
+      <span className="block text-sm font-medium">{label}</span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 w-full rounded-md border bg-white px-3 text-right"
+      >
+        <option value="">اختر</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function ReadOnly({ label, value }: { label: string; value: string }) {
+  return (
+    <label className="space-y-1.5">
+      <span className="block text-sm font-medium">{label}</span>
+      <div className="min-h-10 rounded-md border bg-[#f7f9fa] px-3 py-2 text-sm">
+        {value}
+      </div>
+    </label>
   );
 }
