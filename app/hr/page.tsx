@@ -65,6 +65,72 @@ export default function HR() {
   return <HRView />;
 }
 
+function employeeValue(row: any, ...keys: string[]) {
+  for (const key of keys) {
+    const value = txt(row[key]);
+    if (value) return value;
+  }
+  return "";
+}
+
+async function parseEmployeeWorkbook(file: File) {
+  const wb = XLSX.read(await file.arrayBuffer(), { cellDates: true });
+  const ws = wb.Sheets["الموظفون"] || wb.Sheets["بيانات مصدرة"] || wb.Sheets[wb.SheetNames[0]];
+  if (!ws) throw new Error("لم يتم العثور على ورقة الموظفين");
+  return (XLSX.utils.sheet_to_json(ws) as any[]).map((r) => ({
+    employeeNo: employeeValue(r, "رقم الموظف الأصلي", "الرقم"),
+    employeeCode: employeeValue(r, "كود الموظف"),
+    jobCode: employeeValue(r, "كود المسمى"),
+    categoryCode: employeeValue(r, "كود الدائرة الرئيسية"),
+    mainAdministration: employeeValue(r, "الدائرة الرئيسية"),
+    fullName: employeeValue(r, "اسم الموظف"),
+    nationalId: employeeValue(r, "رقم الهوية", "الهوية"),
+    gender: employeeValue(r, "الجنس"),
+    birthDate: iso(r["تاريخ الميلاد"] ?? r["ت ميلاد"]),
+    cadreType: employeeValue(r, "نوع الكادر"),
+    phone: employeeValue(r, "الجوال", "جوال"),
+    maritalStatus: employeeValue(r, "الحالة الاجتماعية", "حالة اجتماعية"),
+    hireDate: iso(r["تاريخ التعيين"] ?? r["ت تعيين"]),
+    jobTitle: employeeValue(r, "المسمى الوظيفي", "الوظيفة المهنة", "الوظيفة  المهنة"),
+    facility: employeeValue(r, "مركز العمل"),
+    administration: employeeValue(r, "الدائرة الأصلية", "الدائرة"),
+    department: employeeValue(r, "القسم"),
+    qualification: employeeValue(r, "المؤهل العلمي"),
+    specialty: employeeValue(r, "التخصص"),
+    governorate: employeeValue(r, "المحافظة"),
+    city: employeeValue(r, "المدينة"),
+    contractStart: iso(r["بداية العقد"]),
+    contractEnd: iso(r["نهاية العقد"]),
+    endReason: employeeValue(r, "سبب نهاية الخدمة"),
+    endDate: iso(r["تاريخ نهاية الخدمة"] ?? r["بتاريخ"]),
+    status: employeeValue(r, "حالة الموظف") || "على رأس عمله",
+    dualWorkplace: employeeValue(r, "مكان العمل المزدوج"),
+  })).filter((r) => r.employeeNo && r.fullName);
+}
+
+export function EmployeeImportView({ onImported }: { onImported?: () => Promise<void> }) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState("");
+  async function importEmployees(file: File) {
+    try {
+      setBusy(true); setResult("");
+      const rows = await parseEmployeeWorkbook(file);
+      if (!rows.length) throw new Error("لم يتم العثور على سجلات صالحة في الملف");
+      for (let i = 0; i < rows.length; i += 300) {
+        const res = await fetch("/api/hr", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: "employees", rows: rows.slice(i, i + 300) }) });
+        if (!res.ok) throw new Error((await res.json()).error || "فشل استيراد الموظفين");
+      }
+      setResult(`تم استيراد ${n.format(rows.length)} موظف بنجاح`);
+      toast.success(`تم استيراد ${n.format(rows.length)} موظف`);
+      await onImported?.();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "فشل استيراد الملف";
+      setResult(message); toast.error(message);
+    } finally { setBusy(false); }
+  }
+  return <main dir="rtl" className="text-right"><div className="mb-5"><h1 className="text-2xl font-extrabold">استيراد ملف الموظفين</h1><p className="mt-1 text-[#6b7681]">ارفع ملف Excel أو CSV يحتوي ورقة «الموظفون» ليتم إدخاله مباشرة إلى قاعدة البيانات.</p></div><section className="mx-auto max-w-3xl rounded-2xl border bg-white p-6 shadow-sm"><div className="rounded-2xl border-2 border-dashed border-[#e1a4ae] bg-[#fff8f9] p-8 text-center"><FileSpreadsheet className="mx-auto mb-3 size-12 text-[#a50f27]"/><h2 className="text-lg font-bold">ملف الموظفين</h2><p className="mt-2 text-sm leading-7 text-[#6b7681]">يدعم الملف الموحد الذي يحتوي ورقة «الموظفون»، وكذلك ملف «بيانات مصدرة». يتم تحديث السجلات الموجودة حسب رقم الموظف.</p><label className="mt-5 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#a50f27] px-5 py-3 font-bold text-white hover:bg-[#870c20]"><Upload className="size-5"/>{busy ? "جارٍ الاستيراد..." : "اختيار ملف الموظفين"}<input type="file" accept=".xlsx,.xls,.csv" className="hidden" disabled={busy} onChange={(e) => { const file = e.target.files?.[0]; if (file) importEmployees(file); e.currentTarget.value = ""; }} /></label></div>{result && <div className="mt-4 rounded-xl bg-[#f7f9fa] p-4 text-center font-semibold">{result}</div>}<div className="mt-5 rounded-xl bg-[#f7f9fa] p-4 text-sm leading-7 text-[#52606c]"><strong>الحقول الأساسية:</strong> رقم الموظف، اسم الموظف، المسمى الوظيفي، مركز العمل، الدائرة، القسم، نوع الكادر، المحافظة والمدينة. السجلات المكررة يتم تحديثها بدل تكرارها.</div></section></main>;
+}
+
 export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
