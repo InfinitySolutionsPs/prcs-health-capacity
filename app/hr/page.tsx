@@ -41,7 +41,13 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[] };
+type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[] };
+const LOCATION_OPTIONS: Record<string,string[]> = {
+  "المحافظات الجنوبية": ["رفح", "خانيونس"],
+  "المحافظة الوسطى": ["دير البلح", "النصيرات", "البريج", "المغازي"],
+  "محافظة غزة": ["مدينة غزة"],
+  "محافظة الشمال": ["جباليا", "بيت لاهيا", "بيت حانون"],
+};
 const n = new Intl.NumberFormat("en-US");
 const txt = (v: any) => (v == null ? "" : String(v).trim());
 const iso = (v: any) => {
@@ -63,7 +69,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
     [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }),
-    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [] }),
+    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [] }),
     [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=500`);
@@ -533,6 +539,8 @@ function EmployeeDialog({
   const administrations = structure.administrations.filter((a) => !selectedHospital || a.hospitalId === selectedHospital.id);
   const selectedAdministration = administrations.find((a) => a.name === form.administration);
   const departments = structure.departments.filter((d) => (!selectedHospital || d.hospitalId === selectedHospital.id) && (!selectedAdministration || d.administrationId === selectedAdministration.id));
+  const governorates = Object.keys(LOCATION_OPTIONS);
+  const selectedCities = [...new Set([...(LOCATION_OPTIONS[form.governorate] || []), form.city].filter(Boolean))];
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -669,16 +677,8 @@ function EmployeeDialog({
               onChange={(v) => set("maritalStatus", v)}
               options={["أعزب", "متزوج", "مطلق", "أرمل"]}
             />
-            <Field
-              label="المحافظة"
-              value={form.governorate}
-              onChange={(v) => set("governorate", v)}
-            />
-            <Field
-              label="المدينة"
-              value={form.city}
-              onChange={(v) => set("city", v)}
-            />
+            <FixedSelect label="المحافظة" value={form.governorate} onChange={(v) => { set("governorate", v); set("city", ""); }} options={[...new Set([...governorates, form.governorate].filter(Boolean))]} />
+            <FixedSelect label="المدينة" value={form.city} onChange={(v) => set("city", v)} options={selectedCities} />
           </FieldGroup>
 
           <FieldGroup
@@ -709,11 +709,7 @@ function EmployeeDialog({
             <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
             <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
             <FixedSelect label="القسم" value={form.department} onChange={(v) => set("department", v)} options={departments.map((d) => d.name)} />
-            <Field
-              label="نوع الكادر"
-              value={form.cadreType}
-              onChange={(v) => set("cadreType", v)}
-            />
+            <FixedSelect label="نوع الكادر" value={form.cadreType} onChange={(v) => set("cadreType", v)} options={[...(structure.cadreTypes || []).map((c: any) => c.name), form.cadreType].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
             <Field
               label="تاريخ التعيين"
               type="date"
@@ -899,3 +895,4 @@ function ReadOnly({ label, value }: { label: string; value: string }) {
     </label>
   );
 }
+
