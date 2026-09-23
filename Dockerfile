@@ -23,4 +23,3 @@ RUN mkdir -p /app/data
 EXPOSE 3000
 
 CMD ["node", "--import", "./scripts/sites-env.mjs", "./node_modules/wrangler/bin/wrangler.js", "dev", "--config", "dist/server/wrangler.json", "--local", "--persist-to", "/app/data", "--ip", "0.0.0.0", "--port", "3000", "--inspector-port", "0"]
-
