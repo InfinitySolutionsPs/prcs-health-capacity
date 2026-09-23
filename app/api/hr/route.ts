@@ -67,7 +67,7 @@ export async function GET(req: Request) {
     settings: { hospitals: hospitals.results, administrations: administrations.results, departments: departments.results, jobTitles: jobTitles.results, cadreTypes: cadreTypes.results },
   });
 }
-export async function POST(req: Request) {
+async function postHR(req: Request) {
   const b = await req.json();
   const allowed = b.type === "employee"
     ? await requireRole(["admin", "editor"])
@@ -235,3 +235,17 @@ export async function POST(req: Request) {
   );
 }
 
+// Always return JSON to the browser. Without this guard, a database/schema
+// failure can produce an empty or HTML response and the importer reports the
+// misleading "Unexpected end of JSON input" message.
+export async function POST(req: Request) {
+  try {
+    return await postHR(req);
+  } catch (error) {
+    console.error("HR import failed", error);
+    return NextResponse.json(
+      { error: "تعذر استيراد الملف. تحقق من الأعمدة المطلوبة ثم أعد المحاولة." },
+      { status: 500 },
+    );
+  }
+}
