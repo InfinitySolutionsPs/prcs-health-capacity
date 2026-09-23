@@ -80,7 +80,7 @@ export default function Home(){
         {authUser.role==="admin"&&<NavButton active={view==="settings"} onClick={()=>setView("settings")} icon={<Settings/>}>الإعدادات</NavButton>}
         {authUser.role==="admin"&&<NavButton active={view==="users"} onClick={()=>setView("users")} icon={<UserCog/>}>المستخدمون والصلاحيات</NavButton>}
         <NavButton active={view==="hr"} onClick={()=>setView("hr")} icon={<UsersRound/>}>الموظفون والإحصائيات</NavButton>
-        {canEdit&&<NavButton active={view==="employeeImport"} onClick={()=>setView("employeeImport")} icon={<FileSpreadsheet/>}>استيراد الموظفين</NavButton>}
+        {authUser.role==="admin"&&<NavButton active={view==="employeeImport"} onClick={()=>setView("employeeImport")} icon={<FileSpreadsheet/>}>استيراد الموظفين</NavButton>}
         <NavButton active={view==="integrated"} onClick={()=>setView("integrated")} icon={<Layers3/>}>القدرة والموظفون</NavButton>
         <div className="mx-3 mt-5 border-t border-[#e7ebee] pt-4 text-xs leading-6 text-[#7a858f]">تُدار المراكز والإدارات والأقسام والمسميات الثابتة من الإعدادات.</div>
       </aside>
