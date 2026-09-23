@@ -112,6 +112,8 @@ export const systemUsers = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     authUserId: text("auth_user_id"),
+    username: text("username"),
+    passwordHash: text("password_hash"),
     email: text("email").notNull(),
     name: text("name").notNull(),
     role: text("role", { enum: ["admin", "editor", "viewer"] })
@@ -205,4 +207,3 @@ export const payrollEntries = sqliteTable(
     ),
   ],
 );
-
