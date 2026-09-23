@@ -6,7 +6,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
   const u = new URL(req.url),
     q = (u.searchParams.get("q") || "").trim(),
-    limit = Math.min(Number(u.searchParams.get("limit") || 100), 500);
+    limit = Math.min(Number(u.searchParams.get("limit") || 100), 10000);
   const db = getRawDb();
   const where = q
     ? "WHERE full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?"
