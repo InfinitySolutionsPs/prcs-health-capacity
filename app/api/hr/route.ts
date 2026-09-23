@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
 import { requireRole } from "@/lib/authorization";
+import { ensureNormalizedSettings } from "@/db/seed";
 export async function GET(req: Request) {
   if (!(await requireRole(["admin", "editor", "viewer"])))
     return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
@@ -8,11 +9,12 @@ export async function GET(req: Request) {
     q = (u.searchParams.get("q") || "").trim(),
     limit = Math.min(Number(u.searchParams.get("limit") || 100), 10000);
   const db = getRawDb();
+  await ensureNormalizedSettings();
   const where = q
     ? "WHERE full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?"
     : "";
   const args = q ? [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`] : [];
-  const [employees, summary, facilities, statuses, cadres, payroll, jobCodes] =
+  const [employees, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles] =
     await Promise.all([
       db
         .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ?`)
@@ -48,6 +50,10 @@ export async function GET(req: Request) {
           "SELECT job_code AS jobCode,job_title AS jobTitle,category_code AS categoryCode,main_administration AS mainAdministration,COUNT(*) employeeCount FROM employees WHERE job_code IS NOT NULL GROUP BY job_code,job_title,category_code,main_administration ORDER BY main_administration,job_title",
         )
         .all(),
+      db.prepare("SELECT id,name FROM hospitals ORDER BY name").all(),
+      db.prepare("SELECT a.id,a.hospital_id AS hospitalId,a.name,h.name AS hospitalName FROM administrations a JOIN hospitals h ON h.id=a.hospital_id ORDER BY h.name,a.name").all(),
+      db.prepare("SELECT d.id,d.hospital_id AS hospitalId,d.administration_id AS administrationId,COALESCE(a.name,d.division) AS administration,d.name,h.name AS hospitalName FROM departments d JOIN hospitals h ON h.id=d.hospital_id LEFT JOIN administrations a ON a.id=d.administration_id ORDER BY h.name,administration,d.name").all(),
+      db.prepare("SELECT id,name,active,main_administration AS mainAdministration,category_code AS categoryCode,job_code AS jobCode FROM job_titles WHERE active=1 ORDER BY name").all(),
     ]);
   return NextResponse.json({
     employees: employees.results,
@@ -57,6 +63,7 @@ export async function GET(req: Request) {
     cadres: cadres.results,
     payroll,
     jobCodes: jobCodes.results,
+    settings: { hospitals: hospitals.results, administrations: administrations.results, departments: departments.results, jobTitles: jobTitles.results },
   });
 }
 export async function POST(req: Request) {
@@ -70,6 +77,7 @@ export async function POST(req: Request) {
       { status: 403 },
     );
   const db = getRawDb();
+  await ensureNormalizedSettings();
   if (b.type === "employees") {
     const rows = Array.isArray(b.rows) ? b.rows : [];
     for (let i = 0; i < rows.length; i += 80) {
@@ -79,7 +87,7 @@ export async function POST(req: Request) {
           .map((r: any) =>
             db
               .prepare(
-                `INSERT INTO employees(employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(employee_no) DO UPDATE SET employee_code=excluded.employee_code,job_code=excluded.job_code,category_code=excluded.category_code,main_administration=excluded.main_administration,full_name=excluded.full_name,national_id=excluded.national_id,gender=excluded.gender,birth_date=excluded.birth_date,cadre_type=excluded.cadre_type,phone=excluded.phone,marital_status=excluded.marital_status,hire_date=excluded.hire_date,job_title=excluded.job_title,facility=excluded.facility,administration=excluded.administration,department=excluded.department,qualification=excluded.qualification,specialty=excluded.specialty,governorate=excluded.governorate,city=excluded.city,contract_start=excluded.contract_start,contract_end=excluded.contract_end,end_reason=excluded.end_reason,end_date=excluded.end_date,status=excluded.status,dual_workplace=excluded.dual_workplace,updated_at=CURRENT_TIMESTAMP`,
+                `INSERT INTO employees(employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(employee_no) DO UPDATE SET employee_code=excluded.employee_code,job_code=excluded.job_code,category_code=excluded.category_code,main_administration=excluded.main_administration,full_name=excluded.full_name,national_id=excluded.national_id,gender=excluded.gender,birth_date=excluded.birth_date,cadre_type=excluded.cadre_type,phone=excluded.phone,marital_status=excluded.marital_status,hire_date=excluded.hire_date,job_title=excluded.job_title,facility=excluded.facility,administration=excluded.administration,department=excluded.department,qualification=excluded.qualification,specialty=excluded.specialty,governorate=excluded.governorate,city=excluded.city,contract_start=excluded.contract_start,contract_end=excluded.contract_end,end_reason=excluded.end_reason,end_date=excluded.end_date,status=excluded.status,dual_workplace=excluded.dual_workplace,salary=excluded.salary,job_grade=excluded.job_grade,project=excluded.project,project_coverage=excluded.project_coverage,updated_at=CURRENT_TIMESTAMP`,
               )
               .bind(
                 r.employeeNo,
@@ -109,6 +117,10 @@ export async function POST(req: Request) {
                 r.endDate || null,
                 r.status || "على رأس عمله",
                 r.dualWorkplace || null,
+                r.salary || null,
+                r.jobGrade || null,
+                r.project || null,
+                r.projectCoverage || null,
               ),
           ),
       );
@@ -149,8 +161,8 @@ export async function POST(req: Request) {
       national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,
       job_title,facility,administration,department,qualification,specialty,
       governorate,city,contract_start,contract_end,end_reason,end_date,status,
-      dual_workplace,updated_at
-    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`,
+      dual_workplace,salary,job_grade,project,project_coverage,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`,
       )
       .bind(
         employeeNo,
@@ -181,6 +193,10 @@ export async function POST(req: Request) {
         r.endDate || null,
         r.status || "على رأس عمله",
         r.dualWorkplace || null,
+        r.salary || null,
+        r.jobGrade || null,
+        r.project || null,
+        r.projectCoverage || null,
       )
       .run();
     return NextResponse.json({ ok: true, employeeNo, employeeCode });
