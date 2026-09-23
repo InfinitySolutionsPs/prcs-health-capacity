@@ -133,6 +133,10 @@ export const employees = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     employeeNo: text("employee_no").notNull(),
+    firstName: text("first_name"),
+    fatherName: text("father_name"),
+    grandfatherName: text("grandfather_name"),
+    familyName: text("family_name"),
     employeeCode: text("employee_code"),
     jobCode: text("job_code"),
     categoryCode: text("category_code"),
