@@ -2,6 +2,18 @@ import seedData from "./seed-data.json";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
+const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
+
+export async function ensureEmployeeFields(){
+  const db=getRawDb();
+  const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_FIELDS_KEY).first();
+  if(done)return;
+  const columns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
+  const existing=new Set(columns.map(c=>c.name));
+  const fields:[string,string][]=[["salary","TEXT"],["job_grade","TEXT"],["project","TEXT"],["project_coverage","TEXT"]];
+  for(const [name,type] of fields) if(!existing.has(name)) await db.prepare(`ALTER TABLE employees ADD COLUMN ${name} ${type}`).run();
+  await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_FIELDS_KEY,new Date().toISOString()).run();
+}
 
 export async function ensureBaseData(){
   const db=getRawDb();
@@ -36,6 +48,7 @@ export async function ensureBaseData(){
 }
 
 export async function ensureNormalizedSettings(){
+  await ensureEmployeeFields();
   await ensureBaseData();
   const db=getRawDb();
   const divisions=(await db.prepare("SELECT DISTINCT hospital_id AS hospitalId, division FROM departments WHERE administration_id IS NULL").all()).results as {hospitalId:number;division:string}[];
