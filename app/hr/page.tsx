@@ -526,7 +526,7 @@ function EmployeeDialog({
     setForm((current) => ({ ...current, [key]: value }));
 
   function changeJob(jobCode: string) {
-    const job = jobOptions.find((item) => item.jobCode === jobCode);
+    const job = jobOptions.find((item) => (item.jobCode || item.jobTitle) === jobCode);
     setForm((current) => ({
       ...current,
       jobCode,
