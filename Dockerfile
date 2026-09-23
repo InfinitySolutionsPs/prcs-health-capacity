@@ -18,8 +18,7 @@ COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/scripts ./scripts
-COPY --from=build /app/db/employee-seed-1.json ./db/employee-seed-1.json
-COPY --from=build /app/db/employee-seed-2.json ./db/employee-seed-2.json
+COPY --from=build /app/db/employee-seed.json.gz.b64 ./db/employee-seed.json.gz.b64
 
 RUN mkdir -p /app/data
 EXPOSE 3000
