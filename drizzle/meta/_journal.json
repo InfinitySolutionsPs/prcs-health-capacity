@@ -43,6 +43,13 @@
       "when": 1790095067765,
       "tag": "0005_sharp_satana",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790096057464,
+      "tag": "0006_previous_invaders",
+      "breakpoints": true
     }
   ]
 }
