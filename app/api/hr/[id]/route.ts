@@ -6,7 +6,7 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await requireRole(["admin"])))
+  if (!(await requireRole(["admin", "editor"])))
     return NextResponse.json(
       { error: "التعديل متاح لمدير النظام فقط" },
       { status: 403 },
