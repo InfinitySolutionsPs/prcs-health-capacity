@@ -3,6 +3,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Building2, ChartNoAxesColumnIncreasing, Check, ChevronsUpDown, CirclePlus, FileDown, Landmark, Layers3, LogOut, Pencil, Settings, Stethoscope, UserCog, UsersRound } from "lucide-react";
 import { HRView } from "./hr/page";
+import { IntegratedCapacity } from "@/components/integrated-capacity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ type JobTitle={id:number;name:string;active:number;mainAdministration?:string;ca
 type Staffing={id:number;hospitalId:number;hospitalName:string;departmentId:number;administrationId:number;division:string;departmentName:string;jobTitleId:number;jobTitle:string;required:number;available:number;gap:number};
 type Data={hospitals:HospitalRow[];administrations:Administration[];departments:Department[];jobTitles:JobTitle[];staffing:Staffing[]};
 type Role="admin"|"editor"|"viewer";type AuthUser={id:number;email:string;name:string;role:Role};type SystemUser={id:number;email:string;name:string;role:Role;active:number};
-type View="dashboard"|"entry"|"settings"|"users"|"hr";
+type View="dashboard"|"entry"|"settings"|"users"|"hr"|"integrated";
 
 declare global { interface Document { modelContext?: { registerTool:(tool:unknown, options?:{signal?:AbortSignal})=>void|Promise<void> } } }
 
@@ -79,9 +80,10 @@ export default function Home(){
         {authUser.role==="admin"&&<NavButton active={view==="settings"} onClick={()=>setView("settings")} icon={<Settings/>}>الإعدادات</NavButton>}
         {authUser.role==="admin"&&<NavButton active={view==="users"} onClick={()=>setView("users")} icon={<UserCog/>}>المستخدمون والصلاحيات</NavButton>}
         <NavButton active={view==="hr"} onClick={()=>setView("hr")} icon={<UsersRound/>}>الموظفون والإحصائيات</NavButton>
+        <NavButton active={view==="integrated"} onClick={()=>setView("integrated")} icon={<Layers3/>}>القدرة والموظفون</NavButton>
         <div className="mx-3 mt-5 border-t border-[#e7ebee] pt-4 text-xs leading-6 text-[#7a858f]">تُدار المراكز والإدارات والأقسام والمسميات الثابتة من الإعدادات.</div>
       </aside>
-      <section className="min-w-0">{view==="dashboard"?<Dashboard loading={loading} data={data} rows={rows} totals={totals} coverage={coverage} hospitalFilter={hospitalFilter} setHospitalFilter={setHospitalFilter} administrationFilter={administrationFilter} setAdministrationFilter={setAdministrationFilter} departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter} jobTitleFilter={jobTitleFilter} setJobTitleFilter={setJobTitleFilter} administrations={selectedAdministrations} departments={selectedDepartments} reload={load} canEdit={canEdit} deficitOnly={deficitOnly} setDeficitOnly={setDeficitOnly}/>:view==="entry"?<EntryForms data={data} reload={load}/>:view==="settings"?<SettingsView data={data} reload={load}/>:view==="users"?<UsersView currentUser={authUser}/>:<HRView embedded/>}</section>
+      <section className="min-w-0">{view==="dashboard"?<Dashboard loading={loading} data={data} rows={rows} totals={totals} coverage={coverage} hospitalFilter={hospitalFilter} setHospitalFilter={setHospitalFilter} administrationFilter={administrationFilter} setAdministrationFilter={setAdministrationFilter} departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter} jobTitleFilter={jobTitleFilter} setJobTitleFilter={setJobTitleFilter} administrations={selectedAdministrations} departments={selectedDepartments} reload={load} canEdit={canEdit} deficitOnly={deficitOnly} setDeficitOnly={setDeficitOnly}/>:view==="entry"?<EntryForms data={data} reload={load}/>:view==="settings"?<SettingsView data={data} reload={load}/>:view==="users"?<UsersView currentUser={authUser}/>:view==="integrated"?<IntegratedCapacity/>:<HRView embedded/>}</section>
     </div><Toaster position="top-center" richColors />
   </main>
 }
