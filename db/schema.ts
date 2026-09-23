@@ -163,6 +163,10 @@ export const employees = sqliteTable(
     endDate: text("end_date"),
     status: text("status").notNull().default("على رأس عمله"),
     dualWorkplace: text("dual_workplace"),
+    salary: text("salary"),
+    jobGrade: text("job_grade"),
+    project: text("project"),
+    projectCoverage: text("project_coverage"),
     createdAt: text("created_at")
       .notNull()
       .default(sql`CURRENT_TIMESTAMP`),
