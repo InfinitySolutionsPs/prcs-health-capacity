@@ -6,7 +6,6 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
-    env_file:
-      - /opt/prcs-health/prcs-health-capacity/.env
     volumes:
       - /opt/prcs-health/prcs-health-capacity/data:/app/data
+
