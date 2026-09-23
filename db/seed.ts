@@ -3,9 +3,12 @@ import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
+const CADRE_TYPES_KEY="cadre_types_v1";
 
 export async function ensureEmployeeFields(){
   const db=getRawDb();
+  await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
+  await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
   const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_FIELDS_KEY).first();
   if(done)return;
   const columns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
@@ -13,6 +16,7 @@ export async function ensureEmployeeFields(){
   const fields:[string,string][]=[["salary","TEXT"],["job_grade","TEXT"],["project","TEXT"],["project_coverage","TEXT"]];
   for(const [name,type] of fields) if(!existing.has(name)) await db.prepare(`ALTER TABLE employees ADD COLUMN ${name} ${type}`).run();
   await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_FIELDS_KEY,new Date().toISOString()).run();
+  await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(CADRE_TYPES_KEY,new Date().toISOString()).run();
 }
 
 export async function ensureBaseData(){
@@ -61,3 +65,4 @@ export async function ensureNormalizedSettings(){
   await db.prepare("INSERT OR IGNORE INTO job_titles (name) SELECT DISTINCT job_title FROM staffing WHERE TRIM(job_title)<>''").run();
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j WHERE j.name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL").run();
 }
+
