@@ -41,6 +41,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
+type Structure = { hospitals: any[]; administrations: any[]; departments: any[] };
 const n = new Intl.NumberFormat("en-US");
 const txt = (v: any) => (v == null ? "" : String(v).trim());
 const iso = (v: any) => {
@@ -61,13 +62,16 @@ export default function HR() {
 export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
+    [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }),
+    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [] }),
     [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
-    const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}`);
+    const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=500`);
     if (r.ok) setData(await r.json());
   }, [q]);
   useEffect(() => {
     load();
+    fetch("/api/data").then((r) => r.ok ? r.json() : null).then((v) => v && setStructure(v)).catch(() => undefined);
   }, [load]);
   async function upload(file: File, type: "employees" | "payroll") {
     try {
@@ -242,7 +246,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <EmployeeDialog jobCodes={data?.jobCodes || []} onSaved={load} />
+            <EmployeeDialog jobCodes={data?.jobCodes || []} structure={structure} onSaved={load} />
             {!embedded && (
               <a
                 href="/"
@@ -263,27 +267,15 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <Card t="مشاريع الرواتب" v={data?.payroll?.projects} />
           <Card t="إجمالي الرواتب" v={data?.payroll?.gross} money />
         </section>
-        <section className="mb-5 grid gap-4 rounded-2xl border bg-white p-5 lg:grid-cols-2">
-          <div className="lg:col-span-2">
-            <ImportBox
-              title="استيراد الملف الموحّد للموظفين والرواتب"
-              note="يستورد الموظفين والأكواد والرواتب والمشاريع من ملف واحد"
-              onFile={uploadUnified}
-              busy={busy}
-            />
+        <section className="mb-5 rounded-2xl border bg-white p-5">
+          <h2 className="mb-3 font-bold text-[#a50f27]">فلاتر بحث الموظفين</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
+              const values = Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
+              return <select key={key} value={filters[key]} onChange={(e) => setFilters((f) => ({ ...f, [key]: e.target.value }))} className="h-10 rounded-md border bg-white px-3 text-right text-sm"><option value="">كل {label}</option>{values.map((v: any) => <option key={v} value={v}>{v}</option>)}</select>;
+            })}
+            <Button type="button" variant="outline" onClick={() => { setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
           </div>
-          <ImportBox
-            title="استيراد ملف الموظفين"
-            note="اختر ملف بيانات الموظفين الرئيسي"
-            onFile={(f) => upload(f, "employees")}
-            busy={busy}
-          />
-          <ImportBox
-            title="استيراد ملف الرواتب والمشاريع"
-            note="يدعم أوراق الأشهر من يناير إلى يونيو"
-            onFile={(f) => upload(f, "payroll")}
-            busy={busy}
-          />
         </section>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
           <Breakdown title="الموظفون حسب المركز" rows={data?.facilities} />
@@ -303,8 +295,8 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               />
             </div>
           </div>
-          <div className="overflow-auto">
-            <Table>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[1100px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right">الرقم</TableHead>
@@ -316,14 +308,17 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
-                  <TableHead className="text-right">تعديل</TableHead>
+                  <TableHead className="w-16 text-center">إجراء</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.employees?.map((e) => (
+                {data?.employees?.filter((e: any) => {
+                  const match = (key: string) => !filters[key as keyof typeof filters] || String(e[key === "jobTitle" ? "job_title" : key] || "") === filters[key as keyof typeof filters];
+                  return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType");
+                }).map((e) => (
                   <TableRow key={e.id}>
                     <TableCell>{e.employee_no}</TableCell>
-                    <TableCell dir="ltr" className="text-right font-mono">
+                    <TableCell dir="ltr" className="text-right font-mono text-[0.95rem] tracking-tight">
                       {e.employee_code || "—"}
                     </TableCell>
                     <TableCell className="font-semibold">
@@ -335,10 +330,11 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
                     <TableCell>{e.status}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <EmployeeDialog
                         employee={e}
                         jobCodes={data?.jobCodes || []}
+                        structure={structure}
                         onSaved={load}
                       />
                     </TableCell>
@@ -483,10 +479,12 @@ function employeeForm(employee?: any) {
 function EmployeeDialog({
   employee,
   jobCodes,
+  structure,
   onSaved,
 }: {
   employee?: any;
   jobCodes: any[];
+  structure: Structure;
   onSaved: () => Promise<void>;
 }) {
   const editing = Boolean(employee?.id);
@@ -506,6 +504,10 @@ function EmployeeDialog({
       mainAdministration: job?.mainAdministration || "",
     }));
   }
+  const selectedHospital = structure.hospitals.find((h) => h.name === form.facility);
+  const administrations = structure.administrations.filter((a) => !selectedHospital || a.hospitalId === selectedHospital.id);
+  const selectedAdministration = administrations.find((a) => a.name === form.administration);
+  const departments = structure.departments.filter((d) => (!selectedHospital || d.hospitalId === selectedHospital.id) && (!selectedAdministration || d.administrationId === selectedAdministration.id));
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -564,7 +566,7 @@ function EmployeeDialog({
       </DialogTrigger>
       <DialogContent
         dir="rtl"
-        className="max-h-[92vh] overflow-y-auto text-right sm:max-w-5xl"
+        className="max-h-[94dvh] w-[calc(100%-1rem)] overflow-y-auto p-4 text-right sm:w-full sm:max-w-5xl sm:p-6"
       >
         <DialogHeader className="text-right sm:text-right">
           <DialogTitle>
@@ -679,21 +681,9 @@ function EmployeeDialog({
               label="الدائرة الرئيسية"
               value={form.mainAdministration || "تُحدد من المسمى"}
             />
-            <Field
-              label="مركز العمل"
-              value={form.facility}
-              onChange={(v) => set("facility", v)}
-            />
-            <Field
-              label="الدائرة"
-              value={form.administration}
-              onChange={(v) => set("administration", v)}
-            />
-            <Field
-              label="القسم"
-              value={form.department}
-              onChange={(v) => set("department", v)}
-            />
+            <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
+            <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
+            <FixedSelect label="القسم" value={form.department} onChange={(v) => set("department", v)} options={departments.map((d) => d.name)} />
             <Field
               label="نوع الكادر"
               value={form.cadreType}
@@ -762,11 +752,11 @@ function EmployeeDialog({
             />
           </FieldGroup>
 
-          <DialogFooter className="sticky bottom-0 border-t bg-white pt-4 sm:justify-start">
+          <DialogFooter className="border-t bg-white pt-4 sm:justify-start">
             <Button
               type="submit"
               disabled={saving || !validName || !form.jobCode}
-              className="bg-[#a50f27] hover:bg-[#870c20]"
+              className="h-auto min-h-11 w-full whitespace-normal bg-[#a50f27] px-4 py-2.5 text-center leading-6 hover:bg-[#870c20] sm:w-auto"
             >
               {saving
                 ? "جارٍ الحفظ..."
@@ -847,6 +837,18 @@ function Choice({
             {option}
           </option>
         ))}
+      </select>
+    </label>
+  );
+}
+
+function FixedSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
+  return (
+    <label className="space-y-1.5">
+      <span className="block text-sm font-medium">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="h-10 w-full rounded-md border bg-white px-3 text-right" disabled={!options.length}>
+        <option value="">{options.length ? `اختر ${label}` : `لا توجد ${label} مضافة`}</option>
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
       </select>
     </label>
   );
