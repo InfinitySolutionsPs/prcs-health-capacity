@@ -41,7 +41,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-type Structure = { hospitals: any[]; administrations: any[]; departments: any[] };
+type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[] };
 const n = new Intl.NumberFormat("en-US");
 const txt = (v: any) => (v == null ? "" : String(v).trim());
 const iso = (v: any) => {
@@ -105,6 +105,10 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             endDate: iso(r["بتاريخ"]),
             status: txt(r["حالة الموظف"]),
             dualWorkplace: txt(r["مكان العمل المزدوج"]),
+            salary: txt(r["الراتب"] || r["الراتب الأساسي"]),
+            jobGrade: txt(r["الدرجة الوظيفية"] || r["الدرجة"]),
+            project: txt(r["المشروع"]),
+            projectCoverage: txt(r["نسبة التغطية"] || r["نسبة تغطية المشروع"]),
           }))
           .filter((r) => r.employeeNo && r.fullName);
       } else {
@@ -188,6 +192,10 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           endDate: iso(r["تاريخ نهاية الخدمة"]),
           status: txt(r["حالة الموظف"]),
           dualWorkplace: txt(r["مكان العمل المزدوج"]),
+          salary: txt(r["الراتب"] || r["الراتب الأساسي"]),
+          jobGrade: txt(r["الدرجة الوظيفية"] || r["الدرجة"]),
+          project: txt(r["المشروع"]),
+          projectCoverage: txt(r["نسبة التغطية"] || r["نسبة تغطية المشروع"]),
         }))
         .filter((r) => r.employeeNo && r.fullName);
       const payroll = (XLSX.utils.sheet_to_json(payrollSheet) as any[])
@@ -307,6 +315,9 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                   <TableHead className="text-right">القسم</TableHead>
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
+                  <TableHead className="text-right">الدرجة</TableHead>
+                  <TableHead className="text-right">الراتب</TableHead>
+                  <TableHead className="text-right">المشروع / التغطية</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
                   <TableHead className="w-16 text-center">إجراء</TableHead>
                 </TableRow>
@@ -329,6 +340,9 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     <TableCell>{e.department}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
+                    <TableCell>{e.job_grade || "—"}</TableCell>
+                    <TableCell>{e.salary ? `${n.format(Number(e.salary))} ₪` : "—"}</TableCell>
+                    <TableCell>{e.project ? `${e.project}${e.project_coverage ? ` (${e.project_coverage}%)` : ""}` : "—"}</TableCell>
                     <TableCell>{e.status}</TableCell>
                     <TableCell className="text-center">
                       <EmployeeDialog
@@ -439,6 +453,10 @@ const emptyEmployee = {
   endDate: "",
   status: "على رأس عمله",
   dualWorkplace: "",
+  salary: "",
+  jobGrade: "",
+  project: "",
+  projectCoverage: "",
 };
 
 function employeeForm(employee?: any) {
@@ -473,6 +491,10 @@ function employeeForm(employee?: any) {
     endDate: employee.end_date || "",
     status: employee.status || "على رأس عمله",
     dualWorkplace: employee.dual_workplace || "",
+    salary: employee.salary || "",
+    jobGrade: employee.job_grade || "",
+    project: employee.project || "",
+    projectCoverage: employee.project_coverage || "",
   };
 }
 
@@ -491,11 +513,14 @@ function EmployeeDialog({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => employeeForm(employee));
+  const jobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
+    .filter((j: any) => j.jobCode || j.jobTitle)
+    .filter((j: any, i: number, all: any[]) => all.findIndex((x) => (x.jobCode || x.jobTitle) === (j.jobCode || j.jobTitle)) === i);
   const set = (key: string, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
 
   function changeJob(jobCode: string) {
-    const job = jobCodes.find((item) => item.jobCode === jobCode);
+    const job = jobOptions.find((item) => item.jobCode === jobCode);
     setForm((current) => ({
       ...current,
       jobCode,
@@ -670,9 +695,9 @@ function EmployeeDialog({
                 className="h-10 w-full rounded-md border bg-white px-3 text-right"
               >
                 <option value="">اختر المسمى الوظيفي</option>
-                {jobCodes.map((job) => (
-                  <option key={job.jobCode} value={job.jobCode}>
-                    {job.mainAdministration} — {job.jobTitle} ({job.jobCode})
+                {jobOptions.map((job) => (
+                  <option key={job.jobCode || job.jobTitle} value={job.jobCode || job.jobTitle}>
+                    {job.mainAdministration || ""}{job.mainAdministration ? " — " : ""}{job.jobTitle || job.name} {job.jobCode ? `(${job.jobCode})` : ""}
                   </option>
                 ))}
               </select>
@@ -721,6 +746,16 @@ function EmployeeDialog({
               value={form.dualWorkplace}
               onChange={(v) => set("dualWorkplace", v)}
             />
+          </FieldGroup>
+
+          <FieldGroup
+            title="البيانات المالية وتمويل الوظيفة"
+            className="sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <Field label="راتب الموظف (شيكل)" type="number" value={form.salary} onChange={(v) => set("salary", v)} />
+            <Field label="الدرجة الوظيفية" value={form.jobGrade} onChange={(v) => set("jobGrade", v)} />
+            <Field label="المشروع المحمّل عليه" value={form.project} onChange={(v) => set("project", v)} />
+            <Field label="نسبة تغطية الراتب على المشروع (%)" type="number" value={form.projectCoverage} onChange={(v) => set("projectCoverage", v)} />
           </FieldGroup>
 
           <FieldGroup
