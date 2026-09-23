@@ -1,6 +1,7 @@
 import seedData from "./seed-data.json";
 import fs from "node:fs";
 import path from "node:path";
+import zlib from "node:zlib";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
@@ -103,12 +104,23 @@ async function ensureEmployeeSeed(){
   // Read the large employee seed files at runtime. Keeping them out of the
   // build graph prevents Docker/BuildKit memory spikes while preserving
   // automatic seeding on a fresh deployment.
+  const compressedPath=path.join(process.cwd(),'db','employee-seed.json.gz.b64');
+  try {
+    const compressed=Buffer.from(fs.readFileSync(compressedPath,'utf8').trim(),'base64');
+    const parsed=JSON.parse(zlib.gunzipSync(compressed).toString('utf8'));
+    if(Array.isArray(parsed?.records)) return seedEmployeeRecords(parsed.records);
+  } catch { /* fall back to split JSON files below */ }
   const records=(['employee-seed-1.json','employee-seed-2.json'] as const).flatMap(file=>{
     try {
       const parsed=JSON.parse(fs.readFileSync(path.join(process.cwd(),'db',file),'utf8'));
       return Array.isArray(parsed?.records)?parsed.records:[];
     } catch { return []; }
   });
+  return seedEmployeeRecords(records);
+}
+
+async function seedEmployeeRecords(records:any[]){
+  const db=getRawDb();
   for(let i=0;i<records.length;i+=50){
     await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
       employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
