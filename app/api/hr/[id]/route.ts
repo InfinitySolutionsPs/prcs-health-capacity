@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRawDb } from "@/db";
 import { requireRole } from "@/lib/authorization";
+import { ensureNormalizedSettings } from "@/db/seed";
 
 export async function PATCH(
   req: Request,
@@ -27,6 +28,7 @@ export async function PATCH(
     );
 
   const db = getRawDb();
+  await ensureNormalizedSettings();
   const current = await db
     .prepare("SELECT id,job_code,employee_code FROM employees WHERE id=?")
     .bind(id)
@@ -54,6 +56,7 @@ export async function PATCH(
     hire_date=?,job_title=?,facility=?,administration=?,department=?,
     qualification=?,specialty=?,governorate=?,city=?,contract_start=?,
     contract_end=?,end_reason=?,end_date=?,status=?,dual_workplace=?,
+    salary=?,job_grade=?,project=?,project_coverage=?,
     updated_at=CURRENT_TIMESTAMP WHERE id=?`,
     )
     .bind(
@@ -84,6 +87,10 @@ export async function PATCH(
       r.endDate || null,
       r.status || "على رأس عمله",
       r.dualWorkplace || null,
+      r.salary || null,
+      r.jobGrade || null,
+      r.project || null,
+      r.projectCoverage || null,
       id,
     )
     .run();
