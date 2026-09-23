@@ -1,12 +1,38 @@
 import seedData from "./seed-data.json";
 import employeeSeed from "./employee-seed.json";
 import { getRawDb } from "./index";
-import { hashPassword } from "@/lib/password";
 
 const SEED_KEY="hospital_excel_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
 const CADRE_TYPES_KEY="cadre_types_v1";
 const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد ساعات","عقد يومي","عقد استشاري"];
+
+/** Create the complete local-D1 schema for a brand-new Coolify resource. */
+async function ensureCoreSchema(){
+  const db=getRawDb();
+  await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS hospitals (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_hospitals_name ON hospitals(name)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS administrations (id INTEGER PRIMARY KEY AUTOINCREMENT, hospital_id INTEGER NOT NULL, name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_administrations_hospital_name ON administrations(hospital_id,name)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS departments (id INTEGER PRIMARY KEY AUTOINCREMENT, hospital_id INTEGER NOT NULL, administration_id INTEGER, division TEXT NOT NULL DEFAULT 'غير محدد', name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_departments_hospital_division_name ON departments(hospital_id,division,name)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS job_titles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, main_administration TEXT, category_code TEXT, job_code TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name ON job_titles(name)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_job_code ON job_titles(job_code)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS staffing (id INTEGER PRIMARY KEY AUTOINCREMENT, department_id INTEGER NOT NULL, job_title_id INTEGER, job_title TEXT NOT NULL, required INTEGER NOT NULL DEFAULT 0, available INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_staffing_department_job ON staffing(department_id,job_title)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS system_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS system_users (id INTEGER PRIMARY KEY AUTOINCREMENT, auth_user_id TEXT, username TEXT, password_hash TEXT, email TEXT NOT NULL, name TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'viewer', active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_system_users_email ON system_users(email)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_system_users_auth_user_id ON system_users(auth_user_id)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, first_name TEXT, father_name TEXT, grandfather_name TEXT, family_name TEXT, employee_code TEXT, job_code TEXT, category_code TEXT, main_administration TEXT, full_name TEXT NOT NULL, national_id TEXT, gender TEXT, birth_date TEXT, cadre_type TEXT, phone TEXT, marital_status TEXT, hire_date TEXT, job_title TEXT NOT NULL, facility TEXT NOT NULL, administration TEXT, department TEXT, qualification TEXT, specialty TEXT, governorate TEXT, city TEXT, contract_start TEXT, contract_end TEXT, end_reason TEXT, end_date TEXT, status TEXT NOT NULL DEFAULT 'على رأس عمله', dual_workplace TEXT, salary TEXT, job_grade TEXT, project TEXT, project_coverage TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_employee_no ON employees(employee_no)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_employee_code ON employees(employee_code)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS payroll_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, period TEXT NOT NULL, project TEXT NOT NULL, facility TEXT, administration TEXT, gross TEXT NOT NULL DEFAULT '0', deductions TEXT NOT NULL DEFAULT '0', net TEXT NOT NULL DEFAULT '0', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_payroll_employee_period_project ON payroll_entries(employee_no,period,project)"),
+  ]);
+}
 
 export async function ensureEmployeeFields(){
   const db=getRawDb();
@@ -15,9 +41,7 @@ export async function ensureEmployeeFields(){
   if(!userNames.has("username"))await db.prepare("ALTER TABLE system_users ADD COLUMN username TEXT").run();
   if(!userNames.has("password_hash"))await db.prepare("ALTER TABLE system_users ADD COLUMN password_hash TEXT").run();
   const userCount=await db.prepare("SELECT COUNT(*) AS count FROM system_users").first<{count:number}>();
-  if(!userCount?.count){
-    await db.prepare("INSERT INTO system_users (username,email,name,role,active,password_hash) VALUES (?,?,?,?,1,?)").bind("admin","admin@prcs.local","مدير النظام","admin",await hashPassword("admin123")).run();
-  }else{
+  if(userCount?.count){
     await db.prepare("UPDATE system_users SET username=COALESCE(NULLIF(username,''),LOWER(email)) WHERE username IS NULL OR username='' ").run();
   }
   await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
@@ -90,6 +114,7 @@ async function ensureEmployeeSeed(){
 }
 
 export async function ensureNormalizedSettings(){
+  await ensureCoreSchema();
   await ensureEmployeeFields();
   await ensureBaseData();
   await ensureEmployeeSeed();
