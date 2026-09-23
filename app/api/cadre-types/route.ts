@@ -19,4 +19,3 @@ export async function POST(req:Request){
     return NextResponse.json({id:r.meta.last_row_id,name},{status:201});
   }catch{ return NextResponse.json({error:"نوع الكادر موجود مسبقًا أو تعذر الحفظ"},{status:409}); }
 }
-
