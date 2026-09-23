@@ -114,19 +114,73 @@ export async function POST(req: Request) {
   }
   if (b.type === "employee") {
     const r = b.row || {};
-    if (!r.fullName?.trim() || !r.jobCode || !r.jobTitle)
-      return NextResponse.json({ error: "الاسم والمسمى الوظيفي مطلوبان" }, { status: 400 });
+    const nameParts = [
+      r.firstName,
+      r.fatherName,
+      r.grandfatherName,
+      r.familyName,
+    ].map((part) => String(part || "").trim());
+    if (nameParts.some((part) => !part) || !r.jobCode || !r.jobTitle)
+      return NextResponse.json(
+        { error: "الاسم الرباعي والمسمى الوظيفي مطلوبة" },
+        { status: 400 },
+      );
+    const fullName = nameParts.join(" ");
     const last = await db
-      .prepare("SELECT employee_code FROM employees WHERE job_code=? AND employee_code IS NOT NULL ORDER BY employee_code DESC LIMIT 1")
+      .prepare(
+        "SELECT employee_code FROM employees WHERE job_code=? AND employee_code IS NOT NULL ORDER BY employee_code DESC LIMIT 1",
+      )
       .bind(r.jobCode)
       .first<{ employee_code?: string }>();
     const next = Number(last?.employee_code?.split("-").pop() || 0) + 1;
     const employeeCode = `${r.jobCode}-${String(next).padStart(4, "0")}`;
-    const maxNo = await db.prepare("SELECT MAX(CAST(employee_no AS INTEGER)) value FROM employees").first<{value?:number}>();
+    const maxNo = await db
+      .prepare("SELECT MAX(CAST(employee_no AS INTEGER)) value FROM employees")
+      .first<{ value?: number }>();
     const employeeNo = String(Number(maxNo?.value || 0) + 1);
-    await db.prepare("INSERT INTO employees(employee_no,employee_code,job_code,category_code,main_administration,full_name,job_title,facility,administration,department,status,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)")
-      .bind(employeeNo,employeeCode,r.jobCode,r.categoryCode||null,r.mainAdministration||null,r.fullName.trim(),r.jobTitle,r.facility||"غير محدد",r.administration||null,r.department||null,r.status||"على رأس عمله").run();
-    return NextResponse.json({ok:true,employeeNo,employeeCode});
+    await db
+      .prepare(
+        `INSERT INTO employees(
+      employee_no,employee_code,job_code,category_code,main_administration,
+      first_name,father_name,grandfather_name,family_name,full_name,
+      national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,
+      job_title,facility,administration,department,qualification,specialty,
+      governorate,city,contract_start,contract_end,end_reason,end_date,status,
+      dual_workplace,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`,
+      )
+      .bind(
+        employeeNo,
+        employeeCode,
+        r.jobCode,
+        r.categoryCode || null,
+        r.mainAdministration || null,
+        ...nameParts,
+        fullName,
+        r.nationalId || null,
+        r.gender || null,
+        r.birthDate || null,
+        r.cadreType || null,
+        r.phone || null,
+        r.maritalStatus || null,
+        r.hireDate || null,
+        r.jobTitle,
+        r.facility || "غير محدد",
+        r.administration || null,
+        r.department || null,
+        r.qualification || null,
+        r.specialty || null,
+        r.governorate || null,
+        r.city || null,
+        r.contractStart || null,
+        r.contractEnd || null,
+        r.endReason || null,
+        r.endDate || null,
+        r.status || "على رأس عمله",
+        r.dualWorkplace || null,
+      )
+      .run();
+    return NextResponse.json({ ok: true, employeeNo, employeeCode });
   }
   if (b.type === "payroll") {
     const rows = Array.isArray(b.rows) ? b.rows : [];
