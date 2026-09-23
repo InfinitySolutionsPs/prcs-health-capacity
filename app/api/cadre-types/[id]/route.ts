@@ -10,4 +10,3 @@ export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
   if(!Number.isInteger(id)||name.length<2) return NextResponse.json({error:"الاسم غير صحيح"},{status:400});
   try{const r=await getRawDb().prepare("UPDATE cadre_types SET name=? WHERE id=?").bind(name,id).run();return r.meta.changes?NextResponse.json({id,name}):NextResponse.json({error:"السجل غير موجود"},{status:404})}catch{return NextResponse.json({error:"تعذر التعديل أو الاسم مستخدم"},{status:409})}
 }
-
