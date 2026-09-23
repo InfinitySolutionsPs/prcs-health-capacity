@@ -1,4 +1,5 @@
 import seedData from "./seed-data.json";
+import employeeSeed from "./employee-seed.json";
 import { getRawDb } from "./index";
 import { hashPassword } from "@/lib/password";
 
@@ -64,9 +65,34 @@ export async function ensureBaseData(){
   await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(SEED_KEY,new Date().toISOString()).run();
 }
 
+/**
+ * Populate the employee register once on a new/empty deployment. Existing
+ * databases are never overwritten; the normal Excel importer remains the
+ * source of truth for later updates.
+ */
+async function ensureEmployeeSeed(){
+  const db=getRawDb();
+  const existing=await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
+  if((existing?.count||0)>0)return;
+  const records=Array.isArray(employeeSeed.records)?employeeSeed.records:[];
+  for(let i=0;i<records.length;i+=50){
+    await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
+      employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(
+      r.employeeNo,r.employeeCode||null,r.jobCode||null,r.categoryCode||null,r.mainAdministration||null,r.fullName,
+      r.nationalId||null,r.gender||null,r.birthDate||null,r.cadreType||null,r.phone||null,r.maritalStatus||null,
+      r.hireDate||null,r.jobTitle||"غير محدد",r.facility||"غير محدد",r.administration||null,r.department||null,
+      r.qualification||null,r.specialty||null,r.governorate||null,r.city||null,r.contractStart||null,r.contractEnd||null,
+      r.endReason||null,r.endDate||null,r.status||"على رأس عمله",r.dualWorkplace||null,r.salary||null,r.jobGrade||null,
+      r.project||null,r.projectCoverage||null
+    )));
+  }
+}
+
 export async function ensureNormalizedSettings(){
   await ensureEmployeeFields();
   await ensureBaseData();
+  await ensureEmployeeSeed();
   const db=getRawDb();
   const divisions=(await db.prepare("SELECT DISTINCT hospital_id AS hospitalId, division FROM departments WHERE administration_id IS NULL").all()).results as {hospitalId:number;division:string}[];
   for(let i=0;i<divisions.length;i+=50){
