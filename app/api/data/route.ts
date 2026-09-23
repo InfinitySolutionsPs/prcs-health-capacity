@@ -20,4 +20,3 @@ export async function GET(){
     return NextResponse.json({hospitals:hospitals.results,administrations:administrations.results,departments:departments.results,jobTitles:jobTitles.results,cadreTypes:cadreTypes.results,staffing:staffing.results});
   }catch(error){console.error(error);return NextResponse.json({error:"تعذر تحميل البيانات"},{status:500})}
 }
-
