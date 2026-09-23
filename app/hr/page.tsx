@@ -67,7 +67,8 @@ export default function HR() {
 
 function employeeValue(row: any, ...keys: string[]) {
   for (const key of keys) {
-    const value = txt(row[key]);
+    const direct = txt(row[key]);
+    const value = direct || txt(Object.entries(row).find(([k]) => k.replace(/^\uFEFF/, "").trim() === key.trim())?.[1]);
     if (value) return value;
   }
   return "";
@@ -961,4 +962,3 @@ function ReadOnly({ label, value }: { label: string; value: string }) {
     </label>
   );
 }
-
