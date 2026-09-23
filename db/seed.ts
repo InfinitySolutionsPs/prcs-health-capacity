@@ -4,11 +4,13 @@ import { getRawDb } from "./index";
 const SEED_KEY="hospital_excel_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
 const CADRE_TYPES_KEY="cadre_types_v1";
+const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد ساعات","عقد يومي","عقد استشاري"];
 
 export async function ensureEmployeeFields(){
   const db=getRawDb();
   await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
   await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
+  await db.batch(DEFAULT_CADRE_TYPES.map(name=>db.prepare("INSERT OR IGNORE INTO cadre_types (name) VALUES (?)").bind(name)));
   const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_FIELDS_KEY).first();
   if(done)return;
   const columns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
