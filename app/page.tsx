@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Building2, ChartNoAxesColumnIncreasing, Check, ChevronsUpDown, CirclePlus, FileDown, FileSpreadsheet, Landmark, Layers3, LogOut, Pencil, Settings, Stethoscope, Trash2, UserCog, UsersRound } from "lucide-react";
+import { Building2, ChartNoAxesColumnIncreasing, Check, ChevronsUpDown, CirclePlus, FileDown, FileSpreadsheet, Landmark, Layers3, LogOut, Pencil, Settings, Stethoscope, Trash2, UserCog, UsersRound, WalletCards } from "lucide-react";
 import { EmployeeImportView, HRView } from "./hr/page";
 import { IntegratedCapacity } from "@/components/integrated-capacity";
 import { toast } from "sonner";
