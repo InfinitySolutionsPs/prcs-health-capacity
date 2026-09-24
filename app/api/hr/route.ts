@@ -10,6 +10,7 @@ export async function GET(req: Request) {
     limit = Math.min(Number(u.searchParams.get("limit") || 100), 10000);
   const db = getRawDb();
   await ensureNormalizedSettings();
+  const seededCount = await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
   const where = q
     ? "WHERE full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?"
     : "";
@@ -58,6 +59,7 @@ export async function GET(req: Request) {
     ]);
   return NextResponse.json({
     employees: employees.results,
+    employeeCount: Number(seededCount?.count || 0),
     summary,
     facilities: facilities.results,
     statuses: statuses.results,
