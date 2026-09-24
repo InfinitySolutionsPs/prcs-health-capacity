@@ -20,7 +20,7 @@ type Administration={id:number;hospitalId:number;name:string;hospitalName:string
 type Department={id:number;hospitalId:number;administrationId:number;division:string;name:string;hospitalName:string};
 type JobTitle={id:number;name:string;active:number;mainAdministration?:string;categoryCode?:string;jobCode?:string};
 type Staffing={id:number;hospitalId:number;hospitalName:string;departmentId:number;administrationId:number;division:string;departmentName:string;jobTitleId:number;jobTitle:string;required:number;available:number;gap:number};
-type ProjectJob={id:number;projectId:number;projectName:string;jobTitleId:number;jobTitle:string;jobCode?:string;salary:string;coverage:string;requiredCount:number};
+type ProjectJob={id:number;projectId:number;projectName:string;jobTitleId:number;jobTitle:string;jobCode?:string;salary:string;coverage:string;requiredCount:number;employeesCount?:number};
 type Data={hospitals:HospitalRow[];administrations:Administration[];departments:Department[];jobTitles:JobTitle[];cadreTypes:{id:number;name:string}[];projects:{id:number;name:string;startDate?:string;endDate?:string}[];projectJobs:ProjectJob[];staffing:Staffing[]};
 type Role="admin"|"editor"|"viewer";type AuthUser={id:number;email:string;name:string;role:Role};type SystemUser={id:number;email:string;name:string;role:Role;active:number};
 type View="dashboard"|"entry"|"settings"|"users"|"hr"|"employeeImport"|"integrated"|"projectJobs";
