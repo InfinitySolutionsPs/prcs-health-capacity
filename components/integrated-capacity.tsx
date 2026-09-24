@@ -133,6 +133,7 @@ export function IntegratedCapacity() {
     departments: capacity?.departments || [],
     jobTitles: capacity?.jobTitles || [],
     projects: capacity?.projects || [],
+    projectJobs: (capacity as any)?.projectJobs || [],
     cadreTypes: capacity?.cadreTypes || [],
   };
 
@@ -153,6 +154,7 @@ export function IntegratedCapacity() {
     </section>
 
     <section className="rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> البحث والتصفية <span className="text-xs font-normal text-[#7a858f]">اكتب داخل أي فلتر للوصول السريع</span></div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <label className="relative xl:col-span-2"><span className="sr-only">بحث</span><Search className="pointer-events-none absolute right-3 top-3 size-4 text-[#89939c]"/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث باسم المستشفى أو القسم أو المسمى" className="h-10 w-full rounded-lg border bg-white pr-9 pl-3 text-right outline-none focus:ring-2 focus:ring-[#b5122b]/20"/></label>
         <Filter value={hospital} setValue={setHospital} label="المستشفى / المركز" values={options.hospitals}/>
