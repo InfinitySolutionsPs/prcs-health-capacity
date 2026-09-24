@@ -4,8 +4,8 @@ import { ensureNormalizedSettings } from "@/db/seed";
 import { requireRole } from "@/lib/authorization";
 export async function PATCH(req:Request,{params}:{params:Promise<{id:string}>}){
   if(!(await requireRole(["admin"]))) return NextResponse.json({error:"هذه العملية للمدير فقط"},{status:403});
-  await ensureNormalizedSettings();const id=Number((await params).id),name=String((await req.json()).name||"").trim();if(!Number.isInteger(id)||name.length<2)return NextResponse.json({error:"الاسم غير صحيح"},{status:400});
-  try{const r=await getRawDb().prepare("UPDATE projects SET name=? WHERE id=?").bind(name,id).run();return r.meta.changes?NextResponse.json({id,name}):NextResponse.json({error:"السجل غير موجود"},{status:404})}catch{return NextResponse.json({error:"تعذر التعديل أو الاسم مستخدم"},{status:409})}
+  await ensureNormalizedSettings();const id=Number((await params).id),body=await req.json(),name=String(body.name||"").trim(),startDate=String(body.startDate||"").trim(),endDate=String(body.endDate||"").trim();if(!Number.isInteger(id)||name.length<2)return NextResponse.json({error:"البيانات غير صحيحة"},{status:400});if(startDate&&endDate&&startDate>endDate)return NextResponse.json({error:"تاريخ نهاية المشروع يجب أن يكون بعد تاريخ البداية"},{status:400});
+  try{const r=await getRawDb().prepare("UPDATE projects SET name=?,start_date=?,end_date=? WHERE id=?").bind(name,startDate||null,endDate||null,id).run();return r.meta.changes?NextResponse.json({id,name,startDate,endDate}):NextResponse.json({error:"السجل غير موجود"},{status:404})}catch{return NextResponse.json({error:"تعذر التعديل أو الاسم مستخدم"},{status:409})}
 }
 export async function DELETE(_req:Request,{params}:{params:Promise<{id:string}>}){
   if(!(await requireRole(["admin"]))) return NextResponse.json({error:"هذه العملية للمدير فقط"},{status:403});
