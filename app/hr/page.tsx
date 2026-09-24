@@ -43,7 +43,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[] };
+export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[]; projectJobs?: any[] };
 const LOCATION_OPTIONS: Record<string,string[]> = {
   "المحافظات الجنوبية": ["رفح", "خانيونس"],
   "المحافظة الوسطى": ["دير البلح", "النصيرات", "البريج", "المغازي"],
@@ -412,7 +412,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <Card t="إجمالي الرواتب" v={data?.payroll?.gross} money />
         </section>
         <section className="mb-5 rounded-2xl border bg-white p-5">
-          <h2 className="mb-3 font-bold text-[#a50f27]">فلاتر بحث الموظفين</h2>
+          <h2 className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> فلاتر بحث الموظفين <span className="text-xs font-normal text-[#7a858f]">اكتب للبحث داخل أي فلتر</span></h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
               const values = key === "cadreType" ? cadreOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
@@ -580,6 +580,7 @@ const emptyEmployee = {
   salary: "",
   jobGrade: "",
   project: "",
+  projectJobTitle: "",
   projectCoverage: "",
 };
 
@@ -618,6 +619,7 @@ function employeeForm(employee?: any) {
     salary: employee.salary || "",
     jobGrade: employee.job_grade || "",
     project: employee.project || "",
+    projectJobTitle: employee.project_job_title || employee.job_title || "",
     projectCoverage: employee.project_coverage || "",
   };
 }
@@ -672,6 +674,12 @@ export function EmployeeDialog({
   const departments = structure.departments.filter((d) => (!selectedHospital || d.hospitalId === selectedHospital.id) && (!selectedAdministration || d.administrationId === selectedAdministration.id));
   const governorates = Object.keys(LOCATION_OPTIONS);
   const selectedCities = [...new Set([...(LOCATION_OPTIONS[form.governorate] || []), form.city].filter(Boolean))];
+  const projectJobs = (structure.projectJobs || []).filter((item: any) => item.projectName === form.project);
+  function changeProjectJob(id: string) {
+    const item = projectJobs.find((job: any) => String(job.id) === id);
+    if (!item) return;
+    setForm((current) => ({ ...current, projectJobTitle: item.jobTitle, jobCode: item.jobCode || current.jobCode, jobTitle: item.jobTitle, salary: item.salary || current.salary, projectCoverage: item.coverage || current.projectCoverage }));
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -881,7 +889,8 @@ export function EmployeeDialog({
           >
             <Field label="راتب الموظف (شيكل)" type="number" value={form.salary} onChange={(v) => set("salary", v)} />
             <Field label="الدرجة الوظيفية" value={form.jobGrade} onChange={(v) => set("jobGrade", v)} />
-            <FixedSelect label="المشروع المحمّل عليه" value={form.project} onChange={(v) => set("project", v)} options={[...(structure.projects || []).map((p: any) => p.name), form.project].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
+            <FixedSelect label="المشروع المحمّل عليه" value={form.project} onChange={(v) => { set("project", v); set("projectJobTitle", ""); }} options={[...(structure.projects || []).map((p: any) => p.name), form.project].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
+            <label className="space-y-1.5"><span className="block text-sm font-medium">المسمى المحمّل على المشروع</span><select value={projectJobs.find((item: any) => item.jobTitle === form.projectJobTitle)?.id || ""} onChange={(e) => changeProjectJob(e.target.value)} disabled={!projectJobs.length} className="h-10 w-full rounded-md border bg-white px-3 text-right"><option value="">{projectJobs.length ? "اختر وظيفة المشروع" : "اختر المشروع أولًا"}</option>{projectJobs.map((item: any) => <option key={item.id} value={item.id}>{item.jobTitle} — {item.salary} ({item.coverage}%)</option>)}</select></label>
             <Field label="نسبة تغطية الراتب على المشروع (%)" type="number" value={form.projectCoverage} onChange={(v) => set("projectCoverage", v)} />
           </FieldGroup>
 
