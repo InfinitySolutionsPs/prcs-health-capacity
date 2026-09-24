@@ -152,6 +152,13 @@ export function ensureNormalizedSettings(){
   await ensureBaseData();
   await ensureEmployeeSeed();
   const db=getRawDb();
+  const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
+  const projectNames=new Set(projectColumns.map(c=>c.name));
+  if(!projectNames.has("start_date")) await db.prepare("ALTER TABLE projects ADD COLUMN start_date TEXT").run();
+  if(!projectNames.has("end_date")) await db.prepare("ALTER TABLE projects ADD COLUMN end_date TEXT").run();
+  const projectJobColumns=(await db.prepare("PRAGMA table_info(project_jobs)").all()).results as {name:string}[];
+  const projectJobNames=new Set(projectJobColumns.map(c=>c.name));
+  if(!projectJobNames.has("required_count")) await db.prepare("ALTER TABLE project_jobs ADD COLUMN required_count INTEGER NOT NULL DEFAULT 1").run();
   const divisions=(await db.prepare("SELECT DISTINCT hospital_id AS hospitalId, division FROM departments WHERE administration_id IS NULL").all()).results as {hospitalId:number;division:string}[];
   for(let i=0;i<divisions.length;i+=50){
     await db.batch(divisions.slice(i,i+50).map(row=>db.prepare("INSERT OR IGNORE INTO administrations (hospital_id,name) VALUES (?,?)").bind(row.hospitalId,row.division)));
