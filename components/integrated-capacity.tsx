@@ -5,6 +5,7 @@ import { Eye, RefreshCw, Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmployeeDialog, type Structure } from "@/app/hr/page";
+import { SearchableFilterInput } from "@/components/searchable-filter";
 
 type Staffing = {
   id: number;
@@ -230,7 +231,8 @@ function EmployeeEditDialog({ employee, open, onOpenChange }: { employee: Employ
 }
 
 function Filter({ value, setValue, label, values }: { value: string; setValue: (value: string) => void; label: string; values: string[] }) {
-  return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#6b7681]">{label}</span><select value={value} onChange={(e) => setValue(e.target.value)} className="h-10 w-full rounded-lg border bg-white px-3 text-right outline-none focus:ring-2 focus:ring-[#b5122b]/20"><option value="all">الكل</option>{values.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>;
+  const selected = value === "all" ? "" : value;
+  return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#6b7681]">{label}</span><SearchableFilterInput value={selected} onChange={(next) => setValue(next || "all")} placeholder={label} allLabel="الكل" options={values} /></label>;
 }
 
 function Summary({ title, value, tone = "blue" }: { title: string; value: number; tone?: "blue" | "green" | "red" }) {
