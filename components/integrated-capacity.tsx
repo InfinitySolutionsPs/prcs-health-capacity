@@ -33,6 +33,13 @@ type CapacityData = {
 const nf = new Intl.NumberFormat("en-US");
 const clean = (value: unknown) => String(value ?? "").trim();
 const active = (e: Employee) => !e.status || e.status === "على رأس عمله";
+const facilityKey = (value: unknown) => {
+  const name = clean(value);
+  if (name === "مستشفى الامل" || name === "مستشفى الأمل") return "مستشفى الأمل";
+  if (name === "مستشفى السرايا الميداني") return "مستشفى السرايا";
+  if (name === "مستشفى التاهيل الطبي") return "مستشفى التأهيل الطبي";
+  return name;
+};
 
 export function IntegratedCapacity() {
   const [capacity, setCapacity] = useState<CapacityData | null>(null);
@@ -70,11 +77,8 @@ export function IntegratedCapacity() {
   useEffect(() => { load(); }, []);
 
   const employeesFor = (row: Staffing) => employees.filter((employee) => {
-    const employeeAdministration = clean(employee.administration || employee.main_administration);
     return active(employee) &&
-      clean(employee.facility) === clean(row.hospitalName) &&
-      employeeAdministration === clean(row.division) &&
-      clean(employee.department) === clean(row.departmentName) &&
+      facilityKey(employee.facility) === facilityKey(row.hospitalName) &&
       clean(employee.job_title) === clean(row.jobTitle);
   });
 
