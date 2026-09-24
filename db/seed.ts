@@ -8,6 +8,7 @@ const EMPLOYEE_SEED_KEY="employee_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
 const CADRE_TYPES_KEY="cadre_types_v1";
 const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد ساعات","عقد يومي","عقد استشاري"];
+const DEFAULT_PROJECTS=["Bright Futures","DRC-HealthyMinds","DRC/NOVO 2026-2027","ECHO HIP 2025","EHFK الالماني","FRC-CDCS phase 2-2025","GRC- TDA2","GRC-BMZ","GRC-BMZ SSF","GRC-GP1","HOPE","ICRC-EMS","ICRC-EMS-2026","JRCS-CBRP-2026-2027","MEP/SWISS","MedGlobal","PRCS-NORWEGIAN","PRCS_Gavi_2025","SWRC-Sida Hum","TRC-Gaza Health -2026","المشروع الكندي","المشروع النرويجي"];
 
 /** Create the complete local-D1 schema for a brand-new Coolify resource. */
 async function ensureCoreSchema(){
@@ -33,6 +34,7 @@ async function ensureCoreSchema(){
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_employee_code ON employees(employee_code)"),
     db.prepare("CREATE TABLE IF NOT EXISTS payroll_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, period TEXT NOT NULL, project TEXT NOT NULL, facility TEXT, administration TEXT, gross TEXT NOT NULL DEFAULT '0', deductions TEXT NOT NULL DEFAULT '0', net TEXT NOT NULL DEFAULT '0', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_payroll_employee_period_project ON payroll_entries(employee_no,period,project)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
   ]);
 }
 
@@ -49,6 +51,7 @@ export async function ensureEmployeeFields(){
   await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
   await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
   await db.batch(DEFAULT_CADRE_TYPES.map(name=>db.prepare("INSERT OR IGNORE INTO cadre_types (name) VALUES (?)").bind(name)));
+  await db.batch(DEFAULT_PROJECTS.map(name=>db.prepare("INSERT OR IGNORE INTO projects (name) VALUES (?)").bind(name)));
   const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_FIELDS_KEY).first();
   if(done)return;
   const columns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
