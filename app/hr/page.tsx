@@ -1,8 +1,9 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import {
   ArrowRight,
+  Download,
   FileSpreadsheet,
   Pencil,
   Search,
@@ -41,7 +42,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[] };
+type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[] };
 const LOCATION_OPTIONS: Record<string,string[]> = {
   "المحافظات الجنوبية": ["رفح", "خانيونس"],
   "المحافظة الوسطى": ["دير البلح", "النصيرات", "البريج", "المغازي"],
@@ -150,12 +151,14 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
     [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }),
-    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [] }),
+    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
+    [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false);
   const load = useCallback(async () => {
-    const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=500`);
+    const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=10000`);
     if (r.ok) setData(await r.json());
   }, [q]);
+  useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType]);
   useEffect(() => {
     load();
     fetch("/api/data").then((r) => r.ok ? r.json() : null).then((v) => v && setStructure(v)).catch(() => undefined);
@@ -321,6 +324,28 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       setBusy(false);
     }
   }
+  const filteredEmployees = useMemo(() => (data?.employees || []).filter((e: any) => {
+    const match = (key: string) => !filters[key as keyof typeof filters] || String(e[key === "jobTitle" ? "job_title" : key] || "") === filters[key as keyof typeof filters];
+    return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType");
+  }), [data?.employees, filters]);
+  const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
+  const visibleEmployees = filteredEmployees.slice((page - 1) * pageSize, page * pageSize);
+  const cadreOptions = (data?.cadres || []).map((r: any) => String(r.name)).filter(Boolean);
+  const exportFields = [
+    ["employee_no", "رقم الموظف"], ["employee_code", "كود الموظف"], ["full_name", "اسم الموظف"],
+    ["facility", "مركز العمل"], ["administration", "الإدارة"], ["department", "القسم"],
+    ["job_title", "المسمى الوظيفي"], ["cadre_type", "نوع الكادر"], ["status", "الحالة"],
+    ["salary", "الراتب"], ["job_grade", "الدرجة الوظيفية"], ["project", "المشروع"], ["project_coverage", "نسبة التغطية"],
+  ] as const;
+  const [exportOpen, setExportOpen] = useState(false);
+  const [selectedExportFields, setSelectedExportFields] = useState<string[]>(["employee_no", "full_name", "facility", "administration", "department", "job_title", "cadre_type", "status"]);
+  function exportEmployees(){
+    const administrationOrder = ["إدارة المركز", "الإدارة الطبية", "الإدارة التمريضية", "الإدارة الفنية", "الإدارة الفنية المساعدة"];
+    const rank = (e:any) => { const a=String(e.administration||e.main_administration||""); const i=administrationOrder.findIndex(x=>a.includes(x)); return i<0?administrationOrder.length:i; };
+    const sorted=[...filteredEmployees].sort((a,b)=>rank(a)-rank(b)||String(a.administration||a.main_administration||"").localeCompare(String(b.administration||b.main_administration||""),"ar")||((String(a.administration||a.main_administration||"").includes("الطبية")&&!String(b.job_title||"").includes("طوارئ"))?0:0)||String(a.full_name||"").localeCompare(String(b.full_name||""),"ar"));
+    const rows=sorted.map((e:any)=>Object.fromEntries(selectedExportFields.map(key=>[exportFields.find(x=>x[0]===key)?.[1]||key,e[key]??""])));
+    const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"الموظفون"); XLSX.writeFile(wb,"نتائج_بحث_الموظفين.xlsx"); setExportOpen(false);
+  }
   return (
     <main
       dir="rtl"
@@ -341,7 +366,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <EmployeeDialog jobCodes={data?.jobCodes || []} structure={structure} onSaved={load} />
+            <EmployeeDialog jobCodes={data?.jobCodes || []} structure={structure} cadreOptions={cadreOptions} onSaved={load} />
             {!embedded && (
               <a
                 href="/"
@@ -366,7 +391,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <h2 className="mb-3 font-bold text-[#a50f27]">فلاتر بحث الموظفين</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
-              const values = Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
+              const values = key === "cadreType" ? cadreOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
               return <select key={key} value={filters[key]} onChange={(e) => setFilters((f) => ({ ...f, [key]: e.target.value }))} className="h-10 rounded-md border bg-white px-3 text-right text-sm"><option value="">كل {label}</option>{values.map((v: any) => <option key={v} value={v}>{v}</option>)}</select>;
             })}
             <Button type="button" variant="outline" onClick={() => { setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
@@ -379,7 +404,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
         </section>
         <section className="overflow-hidden rounded-2xl border bg-white">
           <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-bold">سجل الموظفين</h2>
+            <h2 className="font-bold">سجل الموظفين <span className="text-sm font-normal text-[#6b7681]">({n.format(filteredEmployees.length)})</span></h2>
             <div className="relative w-full sm:w-80">
               <Search className="absolute right-3 top-3 size-4 text-gray-400" />
               <Input
@@ -388,54 +413,37 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                 placeholder="ابحث بالاسم أو الرقم أو المركز"
                 className="pr-9"
               />
+              <Button type="button" onClick={() => setExportOpen(true)} className="mt-2 w-full gap-2 bg-[#18794e] hover:bg-[#12623e]"><Download className="size-4"/>تصدير نتائج البحث Excel</Button>
             </div>
           </div>
           <div className="overflow-x-auto">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-[820px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-right">الرقم</TableHead>
-                  <TableHead className="text-right">كود الموظف</TableHead>
                   <TableHead className="text-right">اسم الموظف</TableHead>
                   <TableHead className="text-right">المركز</TableHead>
-                  <TableHead className="text-right">الدائرة</TableHead>
-                  <TableHead className="text-right">القسم</TableHead>
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
-                  <TableHead className="text-right">الدرجة</TableHead>
-                  <TableHead className="text-right">الراتب</TableHead>
-                  <TableHead className="text-right">المشروع / التغطية</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
                   <TableHead className="w-16 text-center">إجراء</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.employees?.filter((e: any) => {
-                  const match = (key: string) => !filters[key as keyof typeof filters] || String(e[key === "jobTitle" ? "job_title" : key] || "") === filters[key as keyof typeof filters];
-                  return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType");
-                }).map((e) => (
+                {visibleEmployees.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell>{e.employee_no}</TableCell>
-                    <TableCell dir="ltr" className="text-right font-mono text-[0.95rem] tracking-tight">
-                      {e.employee_code || "—"}
-                    </TableCell>
                     <TableCell className="font-semibold">
                       {e.full_name}
                     </TableCell>
                     <TableCell>{e.facility}</TableCell>
-                    <TableCell>{e.administration}</TableCell>
-                    <TableCell>{e.department}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
-                    <TableCell>{e.job_grade || "—"}</TableCell>
-                    <TableCell>{e.salary ? `${n.format(Number(e.salary))} ₪` : "—"}</TableCell>
-                    <TableCell>{e.project ? `${e.project}${e.project_coverage ? ` (${e.project_coverage}%)` : ""}` : "—"}</TableCell>
                     <TableCell>{e.status}</TableCell>
                     <TableCell className="text-center">
                       <EmployeeDialog
                         employee={e}
                         jobCodes={data?.jobCodes || []}
                         structure={structure}
+                        cadreOptions={cadreOptions}
                         onSaved={load}
                       />
                     </TableCell>
@@ -444,8 +452,13 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               </TableBody>
             </Table>
           </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#fafbfc] p-3 text-sm">
+            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {n.format(filteredEmployees.length)}</span></div>
+            <div className="flex items-center gap-2"><Button type="button" variant="outline" size="sm" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><span>صفحة {page} من {totalPages}</span><Button type="button" variant="outline" size="sm" disabled={page>=totalPages} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
+          </div>
         </section>
       </div>
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}><DialogContent dir="rtl" className="text-right sm:max-w-lg"><DialogHeader className="text-right"><DialogTitle>اختيار أعمدة التصدير</DialogTitle><DialogDescription>سيتم تصدير نتائج البحث الحالية مرتبة حسب الإدارة.</DialogDescription></DialogHeader><div className="grid grid-cols-2 gap-2">{exportFields.map(([key,label])=><label key={key} className="flex items-center gap-2 rounded-lg bg-[#f7f9fa] p-2"><input type="checkbox" checked={selectedExportFields.includes(key)} onChange={e=>setSelectedExportFields(v=>e.target.checked?[...v,key]:v.filter(x=>x!==key))}/><span>{label}</span></label>)}</div><DialogFooter><Button type="button" disabled={!selectedExportFields.length} onClick={exportEmployees} className="w-full gap-2 bg-[#18794e] hover:bg-[#12623e]"><FileSpreadsheet className="size-4"/>تنزيل الملف</Button></DialogFooter></DialogContent></Dialog>
       <Toaster richColors />
     </main>
   );
@@ -589,11 +602,13 @@ function EmployeeDialog({
   employee,
   jobCodes,
   structure,
+  cadreOptions,
   onSaved,
 }: {
   employee?: any;
   jobCodes: any[];
   structure: Structure;
+  cadreOptions: string[];
   onSaved: () => Promise<void>;
 }) {
   const editing = Boolean(employee?.id);
@@ -790,7 +805,7 @@ function EmployeeDialog({
             <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
             <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
             <FixedSelect label="القسم" value={form.department} onChange={(v) => set("department", v)} options={departments.map((d) => d.name)} />
-            <FixedSelect label="نوع الكادر" value={form.cadreType} onChange={(v) => set("cadreType", v)} options={[...(structure.cadreTypes || []).map((c: any) => c.name), form.cadreType].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
+            <FixedSelect label="نوع الكادر" value={form.cadreType} onChange={(v) => set("cadreType", v)} options={[...cadreOptions, form.cadreType].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
             <Field
               label="تاريخ التعيين"
               type="date"
@@ -831,7 +846,7 @@ function EmployeeDialog({
           >
             <Field label="راتب الموظف (شيكل)" type="number" value={form.salary} onChange={(v) => set("salary", v)} />
             <Field label="الدرجة الوظيفية" value={form.jobGrade} onChange={(v) => set("jobGrade", v)} />
-            <Field label="المشروع المحمّل عليه" value={form.project} onChange={(v) => set("project", v)} />
+            <FixedSelect label="المشروع المحمّل عليه" value={form.project} onChange={(v) => set("project", v)} options={[...(structure.projects || []).map((p: any) => p.name), form.project].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
             <Field label="نسبة تغطية الراتب على المشروع (%)" type="number" value={form.projectCoverage} onChange={(v) => set("projectCoverage", v)} />
           </FieldGroup>
 
