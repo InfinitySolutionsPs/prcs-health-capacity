@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { SearchableFilterInput } from "@/components/searchable-filter";
 type D = {
   employees: any[];
   summary: any;
@@ -415,7 +416,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
               const values = key === "cadreType" ? cadreOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
-              return <select key={key} value={filters[key]} onChange={(e) => setFilters((f) => ({ ...f, [key]: e.target.value }))} className="h-10 rounded-md border bg-white px-3 text-right text-sm"><option value="">كل {label}</option>{values.map((v: any) => <option key={v} value={v}>{v}</option>)}</select>;
+              return <SearchableFilterInput key={key} value={filters[key]} onChange={(value) => setFilters((f) => ({ ...f, [key]: value }))} placeholder={label} allLabel={`كل ${label}`} options={values.map(String)} />;
             })}
             <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
           </div>
