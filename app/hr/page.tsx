@@ -411,7 +411,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <Card t="مشاريع الرواتب" v={data?.payroll?.projects} />
           <Card t="إجمالي الرواتب" v={data?.payroll?.gross} money />
         </section>
-        <section className="mb-5 rounded-2xl border bg-white p-5">
+        <section className="mb-5 rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
           <h2 className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> فلاتر بحث الموظفين <span className="text-xs font-normal text-[#7a858f]">اكتب للبحث داخل أي فلتر</span></h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
