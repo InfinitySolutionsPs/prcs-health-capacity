@@ -108,8 +108,11 @@ export async function ensureBaseData(){
 async function ensureEmployeeSeed(){
   const db=getRawDb();
   const seeded=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_SEED_KEY).first();
-  if(seeded)return;
   const existing=await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
+  if(seeded && (existing?.count||0)>0)return;
+  if(seeded && !(existing?.count||0)){
+    await db.prepare("DELETE FROM system_metadata WHERE key=?").bind(EMPLOYEE_SEED_KEY).run();
+  }
   if((existing?.count||0)>0){
     await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
     return;
