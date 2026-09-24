@@ -40,6 +40,8 @@ async function ensureCoreSchema(){
     db.prepare("CREATE TABLE IF NOT EXISTS payroll_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, period TEXT NOT NULL, project TEXT NOT NULL, facility TEXT, administration TEXT, gross TEXT NOT NULL DEFAULT '0', deductions TEXT NOT NULL DEFAULT '0', net TEXT NOT NULL DEFAULT '0', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_payroll_employee_period_project ON payroll_entries(employee_no,period,project)"),
     db.prepare("CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS project_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, job_title_id INTEGER NOT NULL, salary TEXT NOT NULL DEFAULT '0', coverage TEXT NOT NULL DEFAULT '100', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_project_jobs_project_title ON project_jobs(project_id,job_title_id)"),
   ]);
 }
 
