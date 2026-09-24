@@ -155,8 +155,8 @@ export function IntegratedCapacity() {
 
     <section className="rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> البحث والتصفية <span className="text-xs font-normal text-[#7a858f]">اكتب داخل أي فلتر للوصول السريع</span></div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <label className="relative xl:col-span-2"><span className="sr-only">بحث</span><Search className="pointer-events-none absolute right-3 top-3 size-4 text-[#89939c]"/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث باسم المستشفى أو القسم أو المسمى" className="h-10 w-full rounded-lg border bg-white pr-9 pl-3 text-right outline-none focus:ring-2 focus:ring-[#b5122b]/20"/></label>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <label className="relative"><span className="sr-only">بحث</span><Search className="pointer-events-none absolute right-3 top-3.5 size-4 text-[#89939c]"/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث باسم المستشفى أو القسم أو المسمى" className="h-11 w-full rounded-xl border border-[#dfe5e9] bg-white pr-9 pl-3 text-right text-sm outline-none transition focus:border-[#b5122b] focus:ring-2 focus:ring-[#b5122b]/15"/></label>
         <Filter value={hospital} setValue={setHospital} label="المستشفى / المركز" values={options.hospitals}/>
         <Filter value={administration} setValue={setAdministration} label="الإدارة الرئيسية" values={options.administrations}/>
         <Filter value={department} setValue={setDepartment} label="القسم" values={options.departments}/>
@@ -178,7 +178,7 @@ export function IntegratedCapacity() {
           })}</tbody>
         </table>
       </div>
-      {!loading && filteredStaffing.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#f7f9fa] px-4 py-3 text-xs"><label className="flex items-center gap-2">عدد السجلات في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-8 rounded-md border bg-white px-2"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pageCount} — {nf.format(filteredStaffing.length)} سجل</span><Button variant="outline" size="sm" disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>}
+      {!loading && filteredStaffing.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#f7f9fa] px-4 py-3 text-xs"><label className="flex items-center gap-2">عدد السجلات في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-xl border border-[#dfe5e9] bg-white px-3"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pageCount} — {nf.format(filteredStaffing.length)} سجل</span><Button variant="outline" size="sm" disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>}
     </section>
   </div>;
 }
