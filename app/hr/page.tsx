@@ -330,7 +330,18 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     }
   }
   const filteredEmployees = useMemo(() => (data?.employees || []).filter((e: any) => {
-    const match = (key: string) => !filters[key as keyof typeof filters] || String(e[key === "jobTitle" ? "job_title" : key] || "") === filters[key as keyof typeof filters];
+    const employeeField: Record<string, string> = {
+      jobTitle: "job_title",
+      cadreType: "cadre_type",
+      facility: "facility",
+      administration: "administration",
+      department: "department",
+      status: "status",
+    };
+    const match = (key: string) => {
+      const selected = filters[key as keyof typeof filters];
+      return !selected || String(e[employeeField[key] || key] || "") === selected;
+    };
     return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType");
   }), [data?.employees, filters]);
   const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
