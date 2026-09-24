@@ -71,7 +71,8 @@ export async function ensureBaseData(){
   const db=getRawDb();
   const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(SEED_KEY).first();
   const existing=await db.prepare("SELECT COUNT(*) AS count FROM staffing").first<{count:number}>();
-  if(done && (existing?.count||0)>0)return;
+  const linked=await db.prepare("SELECT COUNT(*) AS count FROM staffing s JOIN departments d ON d.id=s.department_id JOIN hospitals h ON h.id=d.hospital_id").first<{count:number}>();
+  if(done && (existing?.count||0)>0 && (linked?.count||0)>0)return;
 
   const hospitals=[...new Set(seedData.records.map(r=>r.hospital))];
   await db.batch(hospitals.map(name=>db.prepare("INSERT OR IGNORE INTO hospitals (name) VALUES (?)").bind(name)));
