@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Eye, RefreshCw, Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { EmployeeDialog, type Structure } from "@/app/hr/page";
 
 type Staffing = {
   id: number;
@@ -28,6 +29,11 @@ type Employee = {
 };
 type CapacityData = {
   hospitals: { id: number; name: string }[];
+  administrations?: any[];
+  departments?: any[];
+  jobTitles?: any[];
+  projects?: any[];
+  cadreTypes?: { id: number; name: string }[];
   staffing: Staffing[];
 };
 
@@ -45,6 +51,8 @@ const facilityKey = (value: unknown) => {
 export function IntegratedCapacity() {
   const [capacity, setCapacity] = useState<CapacityData | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [jobCodes, setJobCodes] = useState<any[]>([]);
+  const [cadreOptions, setCadreOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [hospital, setHospital] = useState("all");
@@ -69,6 +77,8 @@ export function IntegratedCapacity() {
       ]);
       setCapacity(capacityBody);
       setEmployees(employeesBody.employees || []);
+      setJobCodes(employeesBody.jobCodes || []);
+      setCadreOptions((employeesBody.cadreTypes || []).map((item: any) => item.name).filter(Boolean));
     } catch {
       setCapacity(null);
       setEmployees([]);
@@ -116,6 +126,14 @@ export function IntegratedCapacity() {
   const pagedStaffing = filteredStaffing.slice((page - 1) * pageSize, page * pageSize);
   useEffect(() => { setPage(1); }, [query, hospital, administration, department, jobTitle, deficitOnly, pageSize]);
   useEffect(() => { if (page > pageCount) setPage(pageCount); }, [page, pageCount]);
+  const capacityStructure: Structure = {
+    hospitals: capacity?.hospitals || [],
+    administrations: capacity?.administrations || [],
+    departments: capacity?.departments || [],
+    jobTitles: capacity?.jobTitles || [],
+    projects: capacity?.projects || [],
+    cadreTypes: capacity?.cadreTypes || [],
+  };
 
   return <div dir="rtl" className="space-y-5 text-right">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -134,8 +152,7 @@ export function IntegratedCapacity() {
     </section>
 
     <section className="rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5"/>فلاتر شاشة الدمج الجديدة</div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <label className="relative xl:col-span-2"><span className="sr-only">بحث</span><Search className="pointer-events-none absolute right-3 top-3 size-4 text-[#89939c]"/><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث باسم المستشفى أو القسم أو المسمى" className="h-10 w-full rounded-lg border bg-white pr-9 pl-3 text-right outline-none focus:ring-2 focus:ring-[#b5122b]/20"/></label>
         <Filter value={hospital} setValue={setHospital} label="المستشفى / المركز" values={options.hospitals}/>
         <Filter value={administration} setValue={setAdministration} label="الإدارة الرئيسية" values={options.administrations}/>
@@ -148,13 +165,13 @@ export function IntegratedCapacity() {
     <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b px-5 py-4 font-bold"><UsersRound className="size-5 text-[#a50f27]"/>تفاصيل الموظفين حسب الاحتياج</div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-0 border-collapse text-[11px]">
-          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-2 py-2 text-right font-bold">{title}</th>)}</tr></thead>
+        <table className="w-full min-w-[980px] border-collapse text-[0.9rem]">
+          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-3 text-right font-bold">{title}</th>)}</tr></thead>
           <tbody>{loading ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
             const matched = employeesFor(row);
             const actual = matched.length;
             const gap = Math.max(row.required - actual, 0);
-            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-2 py-2 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.division}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.departmentName}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-2 py-2 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-2 py-2 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-2 py-2 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-2 py-2 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
+            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-3 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-3 py-3 text-center"><EmployeeNamesCell employees={matched} jobCodes={jobCodes} structure={capacityStructure} cadreOptions={cadreOptions} onSaved={load}/></td></tr>;
           })}</tbody>
         </table>
       </div>
@@ -163,7 +180,7 @@ export function IntegratedCapacity() {
   </div>;
 }
 
-function EmployeeNamesCell({ employees }: { employees: Employee[] }) {
+function EmployeeNamesCell({ employees, jobCodes, structure, cadreOptions, onSaved }: { employees: Employee[]; jobCodes: any[]; structure: Structure; cadreOptions: string[]; onSaved: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Employee | null>(null);
   const [page, setPage] = useState(1);
@@ -185,7 +202,7 @@ function EmployeeNamesCell({ employees }: { employees: Employee[] }) {
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-md border bg-white px-2"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
       </DialogContent>
     </Dialog>
-    <EmployeeEditDialog employee={detail} open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)} />
+    <EmployeeDialog employee={detail} open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)} hideTrigger jobCodes={jobCodes} structure={structure} cadreOptions={cadreOptions} onSaved={onSaved} />
   </>;
 }
 
@@ -220,3 +237,4 @@ function Summary({ title, value, tone = "blue" }: { title: string; value: number
   const color = tone === "green" ? "border-r-emerald-600" : tone === "red" ? "border-r-[#b5122b]" : "border-r-[#197b9a]";
   return <div className={`rounded-2xl border border-[#dfe5e9] border-r-4 ${color} bg-white p-4 shadow-sm`}><p className="text-sm text-[#6b7681]">{title}</p><p className="mt-2 text-3xl font-extrabold" dir="ltr">{nf.format(value)}</p></div>;
 }
+
