@@ -42,7 +42,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[] };
+export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[] };
 const LOCATION_OPTIONS: Record<string,string[]> = {
   "المحافظات الجنوبية": ["رفح", "خانيونس"],
   "المحافظة الوسطى": ["دير البلح", "النصيرات", "البريج", "المغازي"],
@@ -367,7 +367,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           : "min-h-screen bg-[#f3f6f8] p-4 text-right lg:p-8"
       }
     >
-      <div className="mx-auto max-w-[1500px]">
+      <div className="mx-auto max-w-[1800px]">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-extrabold">
@@ -610,21 +610,32 @@ function employeeForm(employee?: any) {
   };
 }
 
-function EmployeeDialog({
+export function EmployeeDialog({
   employee,
   jobCodes,
   structure,
   cadreOptions,
   onSaved,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  hideTrigger = false,
 }: {
   employee?: any;
   jobCodes: any[];
   structure: Structure;
   cadreOptions: string[];
   onSaved: () => Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) {
   const editing = Boolean(employee?.id);
   const [open, setOpen] = useState(false);
+  const dialogOpen = controlledOpen ?? open;
+  const setDialogOpen = (next: boolean) => {
+    if (controlledOpen === undefined) setOpen(next);
+    controlledOnOpenChange?.(next);
+  };
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => employeeForm(employee));
   const jobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
@@ -666,7 +677,7 @@ function EmployeeDialog({
           ? "تم تحديث بيانات الموظف"
           : `تمت إضافة الموظف بالكود ${result.employeeCode}`,
       );
-      setOpen(false);
+      setDialogOpen(false);
       if (!editing) setForm({ ...emptyEmployee });
       await onSaved();
     } catch (error) {
@@ -687,13 +698,13 @@ function EmployeeDialog({
 
   return (
     <Dialog
-      open={open}
+      open={dialogOpen}
       onOpenChange={(next) => {
-        setOpen(next);
+        setDialogOpen(next);
         if (next) setForm(employeeForm(employee));
       }}
     >
-      <DialogTrigger asChild>
+      {!hideTrigger && <DialogTrigger asChild>
         {editing ? (
           <Button variant="ghost" size="icon" title="تعديل الموظف">
             <Pencil className="size-4" />
@@ -704,10 +715,10 @@ function EmployeeDialog({
             إضافة موظف
           </Button>
         )}
-      </DialogTrigger>
+      </DialogTrigger>}
       <DialogContent
         dir="rtl"
-        className="max-h-[94dvh] w-[calc(100%-1rem)] overflow-y-auto p-4 text-right sm:w-full sm:max-w-5xl sm:p-6"
+        className="max-h-[94dvh] w-[calc(100%-1rem)] overflow-y-auto p-5 text-right text-[1.02rem] sm:w-full sm:max-w-6xl sm:p-7"
       >
         <DialogHeader className="text-right sm:text-right">
           <DialogTitle>
@@ -1003,3 +1014,4 @@ function ReadOnly({ label, value }: { label: string; value: string }) {
     </label>
   );
 }
+
