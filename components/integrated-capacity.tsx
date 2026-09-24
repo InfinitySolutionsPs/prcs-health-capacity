@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { RefreshCw, Search, UsersRound } from "lucide-react";
+import { Eye, RefreshCw, Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Staffing = {
   id: number;
@@ -147,12 +148,40 @@ export function IntegratedCapacity() {
             const matched = employeesFor(row);
             const actual = matched.length;
             const gap = Math.max(row.required - actual, 0);
-            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="border-b px-4 py-3 font-semibold">{row.hospitalName}</td><td className="border-b px-4 py-3">{row.division}</td><td className="border-b px-4 py-3">{row.departmentName}</td><td className="border-b px-4 py-3">{row.jobTitle}</td><td className="border-b px-4 py-3 font-bold">{nf.format(row.required)}</td><td className="border-b px-4 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`border-b px-4 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="border-b px-4 py-3 leading-7">{matched.length ? matched.map((employee) => employee.full_name).join("، ") : <span className="text-[#89939c]">لا يوجد موظفون مسجلون</span>}</td></tr>;
+            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="border-b px-4 py-3 font-semibold">{row.hospitalName}</td><td className="border-b px-4 py-3">{row.division}</td><td className="border-b px-4 py-3">{row.departmentName}</td><td className="border-b px-4 py-3">{row.jobTitle}</td><td className="border-b px-4 py-3 font-bold">{nf.format(row.required)}</td><td className="border-b px-4 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`border-b px-4 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="border-b px-4 py-3 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
           })}</tbody>
         </table>
       </div>
     </section>
   </div>;
+}
+
+function EmployeeNamesCell({ employees }: { employees: Employee[] }) {
+  const [open, setOpen] = useState(false);
+  const [detail, setDetail] = useState<Employee | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const pages = Math.max(1, Math.ceil(employees.length / pageSize));
+  const visible = employees.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => setPage(1), [employees.length, pageSize]);
+  if (!employees.length) return <span className="text-[#89939c]">لا يوجد موظفون</span>;
+  return <>
+    <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-2 border-[#b5122b] text-[#a50f27]">
+      <Eye className="size-4"/>عرض الموظفين ({nf.format(employees.length)})
+    </Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent dir="rtl" className="max-w-3xl text-right">
+        <DialogHeader className="text-right"><DialogTitle>الموظفون الموجودون فعليًا</DialogTitle><DialogDescription>اضغط على اسم الموظف لعرض تفاصيله.</DialogDescription></DialogHeader>
+        <div className="overflow-hidden rounded-xl border">
+          <table className="w-full border-collapse text-sm"><thead className="bg-[#f7f9fa]"><tr><th className="border-b px-3 py-3 text-right">#</th><th className="border-b px-3 py-3 text-right">اسم الموظف</th><th className="border-b px-3 py-3 text-right">المسمى الوظيفي</th><th className="border-b px-3 py-3 text-right">مركز العمل</th><th className="border-b px-3 py-3 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="border-b px-3 py-2">{employee.job_title || "—"}</td><td className="border-b px-3 py-2">{employee.facility || "—"}</td><td className="border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-md border bg-white px-2"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
+      </DialogContent>
+    </Dialog>
+    <Dialog open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)}>
+      <DialogContent dir="rtl" className="max-w-xl text-right"><DialogHeader className="text-right"><DialogTitle>تفاصيل الموظف</DialogTitle><DialogDescription>{detail?.full_name || ""}</DialogDescription></DialogHeader>{detail && <div className="grid gap-3 sm:grid-cols-2">{[["الاسم", detail.full_name], ["كود الموظف", detail.employee_code], ["المسمى الوظيفي", detail.job_title], ["مركز العمل", detail.facility], ["الدائرة", detail.administration || detail.main_administration], ["القسم", detail.department], ["الحالة", detail.status], ["رقم الموظف", detail.id]].map(([label, value]) => <div key={label} className="rounded-lg bg-[#f7f9fa] p-3"><p className="text-xs text-[#6b7681]">{label}</p><p className="mt-1 font-semibold">{value || "—"}</p></div>)}</div>}</DialogContent>
+    </Dialog>
+  </>;
 }
 
 function Filter({ value, setValue, label, values }: { value: string; setValue: (value: string) => void; label: string; values: string[] }) {
