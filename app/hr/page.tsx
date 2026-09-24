@@ -152,7 +152,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
     [searchInput, setSearchInput] = useState(""),
-    [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }),
+    [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "", project: "" }),
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false);
@@ -160,7 +160,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=10000`);
     if (r.ok) setData(await r.json());
   }, [q]);
-  useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType]);
+  useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType, filters.project]);
   useEffect(() => {
     const timer = window.setTimeout(() => setQ(searchInput.trim()), 350);
     return () => window.clearTimeout(timer);
@@ -343,11 +343,15 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       const selected = filters[key as keyof typeof filters];
       return !selected || String(e[employeeField[key] || key] || "") === selected;
     };
-    return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType");
+    return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType") && match("project");
   }), [data?.employees, filters]);
   const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
   const visibleEmployees = filteredEmployees.slice((page - 1) * pageSize, page * pageSize);
   const cadreOptions = (data?.cadres || []).map((r: any) => String(r.name)).filter(Boolean);
+  const projectOptions = Array.from(new Set([
+    ...(structure.projects || []).map((p: any) => String(p.name || p.project || "")),
+    ...(data?.employees || []).map((e: any) => String(e.project || "")),
+  ].filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
   const exportFields = [
     ["employee_no", "رقم الموظف"], ["employee_code", "كود الموظف"], ["full_name", "اسم الموظف"],
     ["facility", "مركز العمل"], ["administration", "الإدارة"], ["department", "القسم"],
@@ -414,11 +418,11 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
         <section className="mb-5 rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
           <h2 className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> فلاتر بحث الموظفين <span className="text-xs font-normal text-[#7a858f]">اكتب للبحث داخل أي فلتر</span></h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"] ] as const).map(([key, label]) => {
-              const values = key === "cadreType" ? cadreOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
+            {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"], ["project", "المشروع"] ] as const).map(([key, label]) => {
+              const values = key === "cadreType" ? cadreOptions : key === "project" ? projectOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
               return <SearchableFilterInput key={key} value={filters[key]} onChange={(value) => setFilters((f) => ({ ...f, [key]: value }))} placeholder={label} allLabel={`كل ${label}`} options={values.map(String)} />;
             })}
-            <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
+            <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "", project: "" }); }}>مسح الفلاتر</Button>
           </div>
         </section>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
@@ -448,6 +452,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                   <TableHead className="text-right">المركز</TableHead>
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
+                  <TableHead className="text-right">المشروع</TableHead>
                   <TableHead className="text-right">الحالة</TableHead>
                   <TableHead className="w-16 text-center">إجراء</TableHead>
                 </TableRow>
@@ -461,6 +466,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     <TableCell>{e.facility}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
+                    <TableCell>{e.project || "—"}</TableCell>
                     <TableCell>{e.status}</TableCell>
                     <TableCell className="text-center">
                       <EmployeeDialog
