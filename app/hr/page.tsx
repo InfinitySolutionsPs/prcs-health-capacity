@@ -150,6 +150,7 @@ export function EmployeeImportView({ onImported }: { onImported?: () => Promise<
 export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
+    [searchInput, setSearchInput] = useState(""),
     [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }),
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
@@ -159,6 +160,10 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     if (r.ok) setData(await r.json());
   }, [q]);
   useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setQ(searchInput.trim()), 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
   useEffect(() => {
     load();
     fetch("/api/data").then((r) => r.ok ? r.json() : null).then((v) => v && setStructure(v)).catch(() => undefined);
@@ -401,7 +406,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               const values = key === "cadreType" ? cadreOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
               return <select key={key} value={filters[key]} onChange={(e) => setFilters((f) => ({ ...f, [key]: e.target.value }))} className="h-10 rounded-md border bg-white px-3 text-right text-sm"><option value="">كل {label}</option>{values.map((v: any) => <option key={v} value={v}>{v}</option>)}</select>;
             })}
-            <Button type="button" variant="outline" onClick={() => { setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
+            <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "" }); }}>مسح الفلاتر</Button>
           </div>
         </section>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
@@ -415,8 +420,8 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             <div className="relative w-full sm:w-80">
               <Search className="absolute right-3 top-3 size-4 text-gray-400" />
               <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="ابحث بالاسم أو الرقم أو المركز"
                 className="pr-9"
               />
