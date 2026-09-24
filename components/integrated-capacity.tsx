@@ -52,6 +52,8 @@ export function IntegratedCapacity() {
   const [department, setDepartment] = useState("all");
   const [jobTitle, setJobTitle] = useState("all");
   const [deficitOnly, setDeficitOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
 
   async function load() {
     setLoading(true);
@@ -110,6 +112,10 @@ export function IntegratedCapacity() {
     const actual = employeesFor(row).length;
     return { required: sum.required + row.required, actual: sum.actual + actual, gap: sum.gap + Math.max(row.required - actual, 0) };
   }, { required: 0, actual: 0, gap: 0 });
+  const pageCount = Math.max(1, Math.ceil(filteredStaffing.length / pageSize));
+  const pagedStaffing = filteredStaffing.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => { setPage(1); }, [query, hospital, administration, department, jobTitle, deficitOnly, pageSize]);
+  useEffect(() => { if (page > pageCount) setPage(pageCount); }, [page, pageCount]);
 
   return <div dir="rtl" className="space-y-5 text-right">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -142,16 +148,17 @@ export function IntegratedCapacity() {
     <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b px-5 py-4 font-bold"><UsersRound className="size-5 text-[#a50f27]"/>تفاصيل الموظفين حسب الاحتياج</div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1050px] border-collapse text-sm">
-          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "أسماء الموظفين الموجودين"].map((title) => <th key={title} className="border-b px-4 py-3 text-right font-bold">{title}</th>)}</tr></thead>
-          <tbody>{loading ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : filteredStaffing.map((row) => {
+        <table className="w-full min-w-[1320px] border-collapse text-xs">
+          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-2 text-right font-bold">{title}</th>)}</tr></thead>
+          <tbody>{loading ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
             const matched = employeesFor(row);
             const actual = matched.length;
             const gap = Math.max(row.required - actual, 0);
-            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="border-b px-4 py-3 font-semibold">{row.hospitalName}</td><td className="border-b px-4 py-3">{row.division}</td><td className="border-b px-4 py-3">{row.departmentName}</td><td className="border-b px-4 py-3">{row.jobTitle}</td><td className="border-b px-4 py-3 font-bold">{nf.format(row.required)}</td><td className="border-b px-4 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`border-b px-4 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="border-b px-4 py-3 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
+            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-2 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-2 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-2 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-3 py-2 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
           })}</tbody>
         </table>
       </div>
+      {!loading && filteredStaffing.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#f7f9fa] px-4 py-3 text-xs"><label className="flex items-center gap-2">عدد السجلات في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-8 rounded-md border bg-white px-2"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pageCount} — {nf.format(filteredStaffing.length)} سجل</span><Button variant="outline" size="sm" disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>}
     </section>
   </div>;
 }
@@ -172,8 +179,8 @@ function EmployeeNamesCell({ employees }: { employees: Employee[] }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent dir="rtl" className="max-w-3xl text-right">
         <DialogHeader className="text-right"><DialogTitle>الموظفون الموجودون فعليًا</DialogTitle><DialogDescription>اضغط على اسم الموظف لعرض تفاصيله.</DialogDescription></DialogHeader>
-        <div className="overflow-hidden rounded-xl border">
-          <table className="w-full border-collapse text-sm"><thead className="bg-[#f7f9fa]"><tr><th className="border-b px-3 py-3 text-right">#</th><th className="border-b px-3 py-3 text-right">اسم الموظف</th><th className="border-b px-3 py-3 text-right">المسمى الوظيفي</th><th className="border-b px-3 py-3 text-right">مركز العمل</th><th className="border-b px-3 py-3 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="border-b px-3 py-2">{employee.job_title || "—"}</td><td className="border-b px-3 py-2">{employee.facility || "—"}</td><td className="border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
+        <div className="overflow-x-auto rounded-xl border">
+          <table className="w-full min-w-[760px] border-collapse text-xs"><thead className="bg-[#f7f9fa]"><tr><th className="whitespace-nowrap border-b px-3 py-2 text-right">#</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">اسم الموظف</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">المسمى الوظيفي</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">مركز العمل</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="whitespace-nowrap border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="whitespace-nowrap border-b px-3 py-2">{employee.job_title || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.facility || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-md border bg-white px-2"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
       </DialogContent>
