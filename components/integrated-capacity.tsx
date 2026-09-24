@@ -148,13 +148,13 @@ export function IntegratedCapacity() {
     <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b px-5 py-4 font-bold"><UsersRound className="size-5 text-[#a50f27]"/>تفاصيل الموظفين حسب الاحتياج</div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1320px] border-collapse text-xs">
-          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-2 text-right font-bold">{title}</th>)}</tr></thead>
+        <table className="w-full min-w-0 border-collapse text-[11px]">
+          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-2 py-2 text-right font-bold">{title}</th>)}</tr></thead>
           <tbody>{loading ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
             const matched = employeesFor(row);
             const actual = matched.length;
             const gap = Math.max(row.required - actual, 0);
-            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-2">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-2 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-2 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-2 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-3 py-2 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
+            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-2 py-2 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.division}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.departmentName}</td><td className="whitespace-nowrap border-b px-2 py-2">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-2 py-2 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-2 py-2 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-2 py-2 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-2 py-2 text-center"><EmployeeNamesCell employees={matched}/></td></tr>;
           })}</tbody>
         </table>
       </div>
@@ -177,18 +177,39 @@ function EmployeeNamesCell({ employees }: { employees: Employee[] }) {
       <Eye className="size-4"/>عرض الموظفين ({nf.format(employees.length)})
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent dir="rtl" className="max-w-3xl text-right">
+      <DialogContent dir="rtl" className="w-[95vw] max-w-6xl text-right">
         <DialogHeader className="text-right"><DialogTitle>الموظفون الموجودون فعليًا</DialogTitle><DialogDescription>اضغط على اسم الموظف لعرض تفاصيله.</DialogDescription></DialogHeader>
         <div className="overflow-x-auto rounded-xl border">
-          <table className="w-full min-w-[760px] border-collapse text-xs"><thead className="bg-[#f7f9fa]"><tr><th className="whitespace-nowrap border-b px-3 py-2 text-right">#</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">اسم الموظف</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">المسمى الوظيفي</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">مركز العمل</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="whitespace-nowrap border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="whitespace-nowrap border-b px-3 py-2">{employee.job_title || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.facility || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
+          <table className="w-full border-collapse text-xs"><thead className="bg-[#f7f9fa]"><tr><th className="whitespace-nowrap border-b px-3 py-2 text-right">#</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">اسم الموظف</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">المسمى الوظيفي</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">مركز العمل</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">القسم</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="whitespace-nowrap border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="whitespace-nowrap border-b px-3 py-2">{employee.job_title || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.facility || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.department || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-md border bg-white px-2"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
       </DialogContent>
     </Dialog>
-    <Dialog open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)}>
-      <DialogContent dir="rtl" className="max-w-xl text-right"><DialogHeader className="text-right"><DialogTitle>تفاصيل الموظف</DialogTitle><DialogDescription>{detail?.full_name || ""}</DialogDescription></DialogHeader>{detail && <div className="grid gap-3 sm:grid-cols-2">{[["الاسم", detail.full_name], ["كود الموظف", detail.employee_code], ["المسمى الوظيفي", detail.job_title], ["مركز العمل", detail.facility], ["الدائرة", detail.administration || detail.main_administration], ["القسم", detail.department], ["الحالة", detail.status], ["رقم الموظف", detail.id]].map(([label, value]) => <div key={label} className="rounded-lg bg-[#f7f9fa] p-3"><p className="text-xs text-[#6b7681]">{label}</p><p className="mt-1 font-semibold">{value || "—"}</p></div>)}</div>}</DialogContent>
-    </Dialog>
+    <EmployeeEditDialog employee={detail} open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)} />
   </>;
+}
+
+function EmployeeEditDialog({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (employee) setForm({
+      firstName: (employee as any).first_name || "", fatherName: (employee as any).father_name || "", grandfatherName: (employee as any).grandfather_name || "", familyName: (employee as any).family_name || "",
+      jobCode: (employee as any).job_code || "", jobTitle: employee.job_title || "", facility: employee.facility || "", administration: employee.administration || employee.main_administration || "", department: employee.department || "", status: employee.status || "على رأس عمله", phone: (employee as any).phone || ""
+    });
+  }, [employee]);
+  const set = (key: string, value: string) => setForm((current) => ({ ...current, [key]: value }));
+  async function save() {
+    if (!employee) return;
+    try {
+      setSaving(true);
+      const response = await fetch(`/api/hr/${employee.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...employee, ...form }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "تعذر تحديث بيانات الموظف");
+      onOpenChange(false);
+    } catch (error) { window.alert(error instanceof Error ? error.message : "تعذر تحديث بيانات الموظف"); } finally { setSaving(false); }
+  }
+  return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent dir="rtl" className="w-[95vw] max-w-3xl text-right"><DialogHeader className="text-right"><DialogTitle>تعديل بيانات الموظف</DialogTitle><DialogDescription>{employee?.full_name || ""}</DialogDescription></DialogHeader>{employee && <div className="grid gap-3 sm:grid-cols-2">{[["firstName","الاسم الأول"],["fatherName","اسم الأب"],["grandfatherName","اسم الجد"],["familyName","اسم العائلة"],["jobCode","كود المسمى"],["jobTitle","المسمى الوظيفي"],["facility","مركز العمل"],["administration","الدائرة"],["department","القسم"],["status","حالة الموظف"],["phone","رقم الجوال"]].map(([key,label]) => <label key={key} className="block"><span className="mb-1 block text-xs font-semibold">{label}</span><input value={form[key] || ""} onChange={(event) => set(key, event.target.value)} className="h-10 w-full rounded-lg border bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-[#b5122b]/20" /></label>)}<Button type="button" disabled={saving} onClick={save} className="sm:col-span-2 bg-[#a50f27] hover:bg-[#870c20]">{saving ? "جارٍ الحفظ..." : "حفظ التعديلات"}</Button></div>}</DialogContent></Dialog>;
 }
 
 function Filter({ value, setValue, label, values }: { value: string; setValue: (value: string) => void; label: string; values: string[] }) {
