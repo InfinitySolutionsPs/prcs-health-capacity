@@ -342,7 +342,14 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   function exportEmployees(){
     const administrationOrder = ["إدارة المركز", "الإدارة الطبية", "الإدارة التمريضية", "الإدارة الفنية", "الإدارة الفنية المساعدة"];
     const rank = (e:any) => { const a=String(e.administration||e.main_administration||""); const i=administrationOrder.findIndex(x=>a.includes(x)); return i<0?administrationOrder.length:i; };
-    const sorted=[...filteredEmployees].sort((a,b)=>rank(a)-rank(b)||String(a.administration||a.main_administration||"").localeCompare(String(b.administration||b.main_administration||""),"ar")||((String(a.administration||a.main_administration||"").includes("الطبية")&&!String(b.job_title||"").includes("طوارئ"))?0:0)||String(a.full_name||"").localeCompare(String(b.full_name||""),"ar"));
+    const sorted=[...filteredEmployees].sort((a,b)=>{
+      const byAdmin=rank(a)-rank(b); if(byAdmin)return byAdmin;
+      const aa=String(a.administration||a.main_administration||""), bb=String(b.administration||b.main_administration||"");
+      const aEmergency=aa.includes("الطبية")&&/طوارئ|استقبال/.test(String(a.job_title||""));
+      const bEmergency=bb.includes("الطبية")&&/طوارئ|استقبال/.test(String(b.job_title||""));
+      if(aEmergency!==bEmergency)return aEmergency?-1:1;
+      return aa.localeCompare(bb,"ar")||String(a.full_name||"").localeCompare(String(b.full_name||""),"ar");
+    });
     const rows=sorted.map((e:any)=>Object.fromEntries(selectedExportFields.map(key=>[exportFields.find(x=>x[0]===key)?.[1]||key,e[key]??""])));
     const ws=XLSX.utils.json_to_sheet(rows); const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"الموظفون"); XLSX.writeFile(wb,"نتائج_بحث_الموظفين.xlsx"); setExportOpen(false);
   }
