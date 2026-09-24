@@ -136,7 +136,7 @@ async function ensureEmployeeSeed(){
 
 async function seedEmployeeRecords(records:any[]){
   const db=getRawDb();
-  for(let i=0;i<records.length;i+=50){
+  for(let i=0;i<records.length;i+=250){
     await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
       employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
     ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(
@@ -150,7 +150,11 @@ async function seedEmployeeRecords(records:any[]){
   }
 }
 
-export async function ensureNormalizedSettings(){
+let normalizedPromise: Promise<void> | null = null;
+
+export function ensureNormalizedSettings(){
+  if(normalizedPromise) return normalizedPromise;
+  normalizedPromise=(async()=>{
   await ensureCoreSchema();
   await ensureEmployeeFields();
   await ensureBaseData();
@@ -165,4 +169,6 @@ export async function ensureNormalizedSettings(){
   }
   await db.prepare("INSERT OR IGNORE INTO job_titles (name) SELECT DISTINCT job_title FROM staffing WHERE TRIM(job_title)<>''").run();
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j WHERE j.name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL").run();
+  })().catch(error=>{ normalizedPromise=null; throw error; });
+  return normalizedPromise;
 }
