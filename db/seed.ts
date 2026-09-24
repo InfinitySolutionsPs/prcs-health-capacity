@@ -1,11 +1,13 @@
 import seedData from "./seed-data.json";
 import employeeSeed from "./employee-seed.json";
+import projectAssignments from "./project-assignments.json";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
 const EMPLOYEE_SEED_KEY="employee_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
 const CADRE_TYPES_KEY="cadre_types_v1";
+const PROJECT_ASSIGNMENTS_KEY="project_assignments_v1";
 const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد ساعات","عقد يومي","عقد استشاري"];
 const DEFAULT_PROJECTS=["Bright Futures","DRC-HealthyMinds","DRC/NOVO 2026-2027","ECHO HIP 2025","EHFK الالماني","FRC-CDCS phase 2-2025","GRC- TDA2","GRC-BMZ","GRC-BMZ SSF","GRC-GP1","HOPE","ICRC-EMS","ICRC-EMS-2026","JRCS-CBRP-2026-2027","MEP/SWISS","MedGlobal","PRCS-NORWEGIAN","PRCS_Gavi_2025","SWRC-Sida Hum","TRC-Gaza Health -2026","المشروع الكندي","المشروع النرويجي"];
 
@@ -126,6 +128,17 @@ async function ensureEmployeeSeed(){
   await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
 }
 
+async function ensureProjectAssignments(){
+  const db=getRawDb();
+  const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(PROJECT_ASSIGNMENTS_KEY).first();
+  if(done)return;
+  const assignments=Array.isArray((projectAssignments as any).assignments)?(projectAssignments as any).assignments:[];
+  for(let i=0;i<assignments.length;i+=50){
+    await db.batch(assignments.slice(i,i+50).map((a:any)=>db.prepare("UPDATE employees SET project=?,updated_at=CURRENT_TIMESTAMP WHERE employee_no=?").bind(a.project,a.employeeNo)));
+  }
+  await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(PROJECT_ASSIGNMENTS_KEY,new Date().toISOString()).run();
+}
+
 async function seedEmployeeRecords(records:any[]){
   const db=getRawDb();
   for(let i=0;i<records.length;i+=50){
@@ -151,6 +164,7 @@ export function ensureNormalizedSettings(){
   await ensureEmployeeFields();
   await ensureBaseData();
   await ensureEmployeeSeed();
+  await ensureProjectAssignments();
   const db=getRawDb();
   const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
   const projectNames=new Set(projectColumns.map(c=>c.name));
@@ -171,4 +185,3 @@ export function ensureNormalizedSettings(){
   })().catch(error=>{ normalizedPromise=null; throw error; });
   return normalizedPromise;
 }
-
