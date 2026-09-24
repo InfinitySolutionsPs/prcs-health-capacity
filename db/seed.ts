@@ -1,6 +1,5 @@
 import seedData from "./seed-data.json";
-import employeeSeedCompressed from "./employee-seed-b64";
-import zlib from "node:zlib";
+import employeeSeed from "./employee-seed.json";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
@@ -115,21 +114,8 @@ async function ensureEmployeeSeed(){
     await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
     return;
   }
-  // Read the large employee seed files at runtime. Keeping them out of the
-  // build graph prevents Docker/BuildKit memory spikes while preserving
-  // automatic seeding on a fresh deployment.
-  try {
-    const compressed=Buffer.from(employeeSeedCompressed,'base64');
-    const parsed=JSON.parse(zlib.gunzipSync(compressed).toString('utf8'));
-    if(Array.isArray(parsed?.records)){
-      await seedEmployeeRecords(parsed.records);
-      await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
-      return;
-    }
-  } catch { /* fall back to split JSON files below */ }
-  const records=(['employee-seed-1.json','employee-seed-2.json'] as const).flatMap(file=>{
-    return [];
-  });
+  const records=Array.isArray(employeeSeed.records)?employeeSeed.records:[];
+  if(!records.length) throw new Error("Employee seed is empty");
   await seedEmployeeRecords(records);
   await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
 }
@@ -137,7 +123,7 @@ async function ensureEmployeeSeed(){
 async function seedEmployeeRecords(records:any[]){
   const db=getRawDb();
   for(let i=0;i<records.length;i+=250){
-    await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
+    await db.batch(records.slice(i,i+250).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
       employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
     ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(
       r.employeeNo,r.employeeCode||null,r.jobCode||null,r.categoryCode||null,r.mainAdministration||null,r.fullName,
