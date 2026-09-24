@@ -125,8 +125,8 @@ async function ensureEmployeeSeed(){
 
 async function seedEmployeeRecords(records:any[]){
   const db=getRawDb();
-  for(let i=0;i<records.length;i+=250){
-    await db.batch(records.slice(i,i+250).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
+  for(let i=0;i<records.length;i+=50){
+    await db.batch(records.slice(i,i+50).map((r:any)=>db.prepare(`INSERT OR IGNORE INTO employees(
       employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at
     ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`).bind(
       r.employeeNo,r.employeeCode||null,r.jobCode||null,r.categoryCode||null,r.mainAdministration||null,r.fullName,
