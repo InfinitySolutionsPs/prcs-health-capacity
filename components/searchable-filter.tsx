@@ -27,7 +27,7 @@ export function SearchableFilterInput({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={value ? undefined : allLabel || placeholder}
-        className="h-10 w-full rounded-md border bg-white px-3 pr-9 text-right text-sm outline-none focus:border-[#b5122b] focus:ring-2 focus:ring-[#b5122b]/15"
+        className="h-11 w-full rounded-xl border border-[#dfe5e9] bg-white px-3 pr-9 text-right text-sm outline-none transition focus:border-[#b5122b] focus:ring-2 focus:ring-[#b5122b]/15"
         aria-label={placeholder}
       />
       <datalist id={id}>{values.map((option) => <option key={option} value={option} />)}</datalist>
