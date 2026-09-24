@@ -4,6 +4,7 @@ import zlib from "node:zlib";
 import { getRawDb } from "./index";
 
 const SEED_KEY="hospital_excel_seed_v1";
+const EMPLOYEE_SEED_KEY="employee_seed_v1";
 const EMPLOYEE_FIELDS_KEY="employee_salary_fields_v1";
 const CADRE_TYPES_KEY="cadre_types_v1";
 const DEFAULT_CADRE_TYPES=["كادر","عقد","عقد مشروع","عقد ساعات","عقد يومي","عقد استشاري"];
@@ -98,20 +99,30 @@ export async function ensureBaseData(){
  */
 async function ensureEmployeeSeed(){
   const db=getRawDb();
+  const seeded=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_SEED_KEY).first();
+  if(seeded)return;
   const existing=await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
-  if((existing?.count||0)>0)return;
+  if((existing?.count||0)>0){
+    await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
+    return;
+  }
   // Read the large employee seed files at runtime. Keeping them out of the
   // build graph prevents Docker/BuildKit memory spikes while preserving
   // automatic seeding on a fresh deployment.
   try {
     const compressed=Buffer.from(employeeSeedCompressed,'base64');
     const parsed=JSON.parse(zlib.gunzipSync(compressed).toString('utf8'));
-    if(Array.isArray(parsed?.records)) return seedEmployeeRecords(parsed.records);
+    if(Array.isArray(parsed?.records)){
+      await seedEmployeeRecords(parsed.records);
+      await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
+      return;
+    }
   } catch { /* fall back to split JSON files below */ }
   const records=(['employee-seed-1.json','employee-seed-2.json'] as const).flatMap(file=>{
     return [];
   });
-  return seedEmployeeRecords(records);
+  await seedEmployeeRecords(records);
+  await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind(EMPLOYEE_SEED_KEY,new Date().toISOString()).run();
 }
 
 async function seedEmployeeRecords(records:any[]){
