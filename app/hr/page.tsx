@@ -864,7 +864,7 @@ export function EmployeeDialog({
             />
             <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
             <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
-            <FixedSelect label="القسم" value={form.department} onChange={(v) => set("department", v)} options={departments.map((d) => d.name)} />
+            <FixedSelect label="القسم" value={form.department} onChange={(v) => { set("department", v); set("jobCode", ""); set("jobTitle", ""); }} options={departments.map((d) => d.name)} />
             <FixedSelect label="نوع الكادر" value={form.cadreType} onChange={(v) => set("cadreType", v)} options={[...cadreOptions, form.cadreType].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
             <Field
               label="تاريخ التعيين"
