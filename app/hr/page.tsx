@@ -152,7 +152,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   const [data, setData] = useState<D | null>(null),
     [q, setQ] = useState(""),
     [searchInput, setSearchInput] = useState(""),
-    [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "", project: "" }),
+    [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "على رأس عمله", cadreType: "", project: "" }),
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false);
@@ -422,7 +422,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
               const values = key === "cadreType" ? cadreOptions : key === "project" ? projectOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
               return <SearchableFilterInput key={key} value={filters[key]} onChange={(value) => setFilters((f) => ({ ...f, [key]: value }))} placeholder={label} allLabel={`كل ${label}`} options={values.map(String)} />;
             })}
-            <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "", cadreType: "", project: "" }); }}>مسح الفلاتر</Button>
+            <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "على رأس عمله", cadreType: "", project: "" }); }}>مسح الفلاتر</Button>
           </div>
         </section>
         <section className="mb-5 grid gap-4 lg:grid-cols-3">
