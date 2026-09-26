@@ -205,6 +205,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             dualWorkplace: txt(r["مكان العمل المزدوج"]),
             salary: txt(r["الراتب"] || r["الراتب الأساسي"]),
             jobGrade: txt(r["الدرجة الوظيفية"] || r["الدرجة"]),
+            nextGradeEligibility: iso(r["استحقاق الدرجة التالية"] || r["تاريخ استحقاق الدرجة التالية"]),
             project: txt(r["المشروع"]),
             projectCoverage: txt(r["نسبة التغطية"] || r["نسبة تغطية المشروع"]),
           }))
@@ -358,7 +359,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     ["employee_no", "رقم الموظف"], ["employee_code", "كود الموظف"], ["full_name", "اسم الموظف"],
     ["facility", "مركز العمل"], ["administration", "الإدارة"], ["department", "القسم"],
     ["job_title", "المسمى الوظيفي"], ["cadre_type", "نوع الكادر"], ["status", "الحالة"],
-    ["salary", "الراتب"], ["job_grade", "الدرجة الوظيفية"], ["project", "المشروع"], ["project_coverage", "نسبة التغطية"],
+    ["salary", "الراتب"], ["job_grade", "الدرجة الوظيفية"], ["next_grade_eligibility", "استحقاق الدرجة التالية"], ["project", "المشروع"], ["project_coverage", "نسبة التغطية"],
   ] as const;
   const [exportOpen, setExportOpen] = useState(false);
   const [selectedExportFields, setSelectedExportFields] = useState<string[]>(["employee_no", "full_name", "facility", "administration", "department", "job_title", "cadre_type", "status"]);
@@ -589,6 +590,7 @@ const emptyEmployee = {
   dualWorkplace: "",
   salary: "",
   jobGrade: "",
+  nextGradeEligibility: "",
   project: "",
   projectJobTitle: "",
   projectCoverage: "",
@@ -628,6 +630,7 @@ function employeeForm(employee?: any) {
     dualWorkplace: employee.dual_workplace || "",
     salary: employee.salary || "",
     jobGrade: employee.job_grade || "",
+    nextGradeEligibility: employee.next_grade_eligibility || "",
     project: employee.project || "",
     projectJobTitle: employee.project_job_title || employee.job_title || "",
     projectCoverage: employee.project_coverage || "",
@@ -913,6 +916,7 @@ export function EmployeeDialog({
           >
             <Field label="راتب الموظف (شيكل)" type="number" value={form.salary} onChange={(v) => set("salary", v)} />
             <Field label="الدرجة الوظيفية" value={form.jobGrade} onChange={(v) => set("jobGrade", v)} />
+            <Field label="استحقاق الدرجة التالية" type="date" value={form.nextGradeEligibility} onChange={(v) => set("nextGradeEligibility", v)} />
             <FixedSelect label="المشروع المحمّل عليه" value={form.project} onChange={(v) => { set("project", v); set("projectJobTitle", ""); }} options={[...(structure.projects || []).map((p: any) => p.name), form.project].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
             <label className="space-y-1.5"><span className="block text-sm font-medium">المسمى المحمّل على المشروع</span><select value={projectJobs.find((item: any) => item.jobTitle === form.projectJobTitle)?.id || ""} onChange={(e) => changeProjectJob(e.target.value)} disabled={!projectJobs.length} className="h-10 w-full rounded-md border bg-white px-3 text-right"><option value="">{projectJobs.length ? "اختر وظيفة المشروع" : "اختر المشروع أولًا"}</option>{projectJobs.map((item: any) => <option key={item.id} value={item.id}>{item.jobTitle} — {item.salary} ({item.coverage}%)</option>)}</select></label>
             <Field label="نسبة تغطية الراتب على المشروع (%)" type="number" value={form.projectCoverage} onChange={(v) => set("projectCoverage", v)} />
@@ -984,7 +988,7 @@ function EmployeeDetailsDialog({ employee, onClose, jobCodes, structure, cadreOp
               ["المشروع", employee.project || "غير مرتبط بمشروع"], ["نسبة التغطية", employee.project_coverage ? String(employee.project_coverage) + "%" : "—"],
               ["مركز العمل", employee.facility], ["الإدارة", employee.administration || employee.main_administration],
               ["القسم", employee.department], ["الحالة", employee.status], ["الجوال", employee.phone],
-              ["الراتب", employee.salary], ["الدرجة الوظيفية", employee.job_grade],
+              ["الراتب", employee.salary], ["الدرجة الوظيفية", employee.job_grade], ["استحقاق الدرجة التالية", employee.next_grade_eligibility],
             ].map(([label, value]) => <div key={label} className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">{label}</div><div className="mt-1 font-semibold">{value || "—"}</div></div>)}
           </div>}
           <DialogFooter className="border-t pt-4 sm:justify-start">
