@@ -56,7 +56,7 @@ export async function PATCH(
     hire_date=?,job_title=?,facility=?,administration=?,department=?,
     qualification=?,specialty=?,governorate=?,city=?,contract_start=?,
     contract_end=?,end_reason=?,end_date=?,status=?,dual_workplace=?,
-    salary=?,job_grade=?,project=?,project_coverage=?,
+    salary=?,job_grade=?,next_grade_eligibility=?,project=?,project_coverage=?,
     updated_at=CURRENT_TIMESTAMP WHERE id=?`,
     )
     .bind(
@@ -89,6 +89,7 @@ export async function PATCH(
       r.dualWorkplace || null,
       r.salary || null,
       r.jobGrade || null,
+      r.nextGradeEligibility || null,
       r.project || null,
       r.projectCoverage || null,
       id,
