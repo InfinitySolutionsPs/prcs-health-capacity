@@ -126,7 +126,8 @@ async function parseEmployeeWorkbook(file: File) {
 }
 
 export function EmployeeImportView({ onImported }: { onImported?: () => Promise<void> }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false),
+    [detailEmployee, setDetailEmployee] = useState<any | null>(null);
   const [result, setResult] = useState("");
   async function importEmployees(file: File) {
     try {
@@ -461,12 +462,12 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                 {visibleEmployees.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="font-semibold">
-                      {e.full_name}
+                      <button type="button" className="text-right font-semibold text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailEmployee(e)}>{e.full_name}</button>
                     </TableCell>
                     <TableCell>{e.facility}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
-                    <TableCell>{e.project || "—"}</TableCell>
+                    <TableCell>{e.project ? <button type="button" className="text-right text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailEmployee(e)}>{e.project}</button> : "—"}</TableCell>
                     <TableCell>{e.status}</TableCell>
                     <TableCell className="text-center">
                       <EmployeeDialog
@@ -488,6 +489,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           </div>
         </section>
       </div>
+      <EmployeeDetailsDialog employee={detailEmployee} onClose={() => setDetailEmployee(null)} jobCodes={data?.jobCodes || []} structure={structure} cadreOptions={cadreOptions} onSaved={load} />
       <Dialog open={exportOpen} onOpenChange={setExportOpen}><DialogContent dir="rtl" className="text-right sm:max-w-lg"><DialogHeader className="text-right"><DialogTitle>اختيار أعمدة التصدير</DialogTitle><DialogDescription>سيتم تصدير نتائج البحث الحالية مرتبة حسب الإدارة.</DialogDescription></DialogHeader><div className="grid grid-cols-2 gap-2">{exportFields.map(([key,label])=><label key={key} className="flex items-center gap-2 rounded-lg bg-[#f7f9fa] p-2"><input type="checkbox" checked={selectedExportFields.includes(key)} onChange={e=>setSelectedExportFields(v=>e.target.checked?[...v,key]:v.filter(x=>x!==key))}/><span>{label}</span></label>)}</div><DialogFooter><Button type="button" disabled={!selectedExportFields.length} onClick={exportEmployees} className="w-full gap-2 bg-[#18794e] hover:bg-[#12623e]"><FileSpreadsheet className="size-4"/>تنزيل الملف</Button></DialogFooter></DialogContent></Dialog>
       <Toaster richColors />
     </main>
@@ -945,6 +947,37 @@ export function EmployeeDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function EmployeeDetailsDialog({ employee, onClose, jobCodes, structure, cadreOptions, onSaved }: { employee: any | null; onClose: () => void; jobCodes: any[]; structure: Structure; cadreOptions: string[]; onSaved: () => Promise<void> }) {
+  const [editOpen, setEditOpen] = useState(false);
+  useEffect(() => { if (!employee) setEditOpen(false); }, [employee]);
+  return (
+    <>
+      <Dialog open={Boolean(employee) && !editOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+        <DialogContent dir="rtl" className="max-h-[92dvh] overflow-y-auto text-right sm:max-w-3xl">
+          <DialogHeader className="text-right">
+            <DialogTitle>تفاصيل الموظف</DialogTitle>
+            <DialogDescription>عرض كامل لبيانات الموظف والمشروع المرتبط به.</DialogDescription>
+          </DialogHeader>
+          {employee && <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              ["اسم الموظف", employee.full_name], ["رقم الموظف", employee.employee_no],
+              ["المسمى الوظيفي", employee.job_title], ["نوع الكادر", employee.cadre_type],
+              ["المشروع", employee.project || "غير مرتبط بمشروع"], ["نسبة التغطية", employee.project_coverage ? String(employee.project_coverage) + "%" : "—"],
+              ["مركز العمل", employee.facility], ["الإدارة", employee.administration || employee.main_administration],
+              ["القسم", employee.department], ["الحالة", employee.status], ["الجوال", employee.phone],
+              ["الراتب", employee.salary], ["الدرجة الوظيفية", employee.job_grade],
+            ].map(([label, value]) => <div key={label} className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">{label}</div><div className="mt-1 font-semibold">{value || "—"}</div></div>)}
+          </div>}
+          <DialogFooter className="border-t pt-4 sm:justify-start">
+            <Button type="button" className="bg-[#a50f27] hover:bg-[#870c20]" onClick={() => setEditOpen(true)}>تعديل بيانات الموظف</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {employee && <EmployeeDialog employee={employee} jobCodes={jobCodes} structure={structure} cadreOptions={cadreOptions} onSaved={async () => { await onSaved(); setEditOpen(false); onClose(); }} open={editOpen} onOpenChange={setEditOpen} hideTrigger />}
+    </>
   );
 }
 
