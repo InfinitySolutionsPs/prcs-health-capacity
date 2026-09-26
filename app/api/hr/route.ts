@@ -90,7 +90,7 @@ async function postHR(req: Request) {
           .map((r: any) =>
             db
               .prepare(
-                `INSERT INTO employees(employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,project,project_coverage,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(employee_no) DO UPDATE SET employee_code=excluded.employee_code,job_code=excluded.job_code,category_code=excluded.category_code,main_administration=excluded.main_administration,full_name=excluded.full_name,national_id=excluded.national_id,gender=excluded.gender,birth_date=excluded.birth_date,cadre_type=excluded.cadre_type,phone=excluded.phone,marital_status=excluded.marital_status,hire_date=excluded.hire_date,job_title=excluded.job_title,facility=excluded.facility,administration=excluded.administration,department=excluded.department,qualification=excluded.qualification,specialty=excluded.specialty,governorate=excluded.governorate,city=excluded.city,contract_start=excluded.contract_start,contract_end=excluded.contract_end,end_reason=excluded.end_reason,end_date=excluded.end_date,status=excluded.status,dual_workplace=excluded.dual_workplace,salary=excluded.salary,job_grade=excluded.job_grade,project=excluded.project,project_coverage=excluded.project_coverage,updated_at=CURRENT_TIMESTAMP`,
+                `INSERT INTO employees(employee_no,employee_code,job_code,category_code,main_administration,full_name,national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,job_title,facility,administration,department,qualification,specialty,governorate,city,contract_start,contract_end,end_reason,end_date,status,dual_workplace,salary,job_grade,next_grade_eligibility,project,project_coverage,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP) ON CONFLICT(employee_no) DO UPDATE SET employee_code=excluded.employee_code,job_code=excluded.job_code,category_code=excluded.category_code,main_administration=excluded.main_administration,full_name=excluded.full_name,national_id=excluded.national_id,gender=excluded.gender,birth_date=excluded.birth_date,cadre_type=excluded.cadre_type,phone=excluded.phone,marital_status=excluded.marital_status,hire_date=excluded.hire_date,job_title=excluded.job_title,facility=excluded.facility,administration=excluded.administration,department=excluded.department,qualification=excluded.qualification,specialty=excluded.specialty,governorate=excluded.governorate,city=excluded.city,contract_start=excluded.contract_start,contract_end=excluded.contract_end,end_reason=excluded.end_reason,end_date=excluded.end_date,status=excluded.status,dual_workplace=excluded.dual_workplace,salary=excluded.salary,job_grade=excluded.job_grade,project=excluded.project,project_coverage=excluded.project_coverage,next_grade_eligibility=excluded.next_grade_eligibility,updated_at=CURRENT_TIMESTAMP`,
               )
               .bind(
                 r.employeeNo,
@@ -122,6 +122,7 @@ async function postHR(req: Request) {
                 r.dualWorkplace || null,
                 r.salary || null,
                 r.jobGrade || null,
+                r.nextGradeEligibility || null,
                 r.project || null,
                 r.projectCoverage || null,
               ),
@@ -164,8 +165,8 @@ async function postHR(req: Request) {
       national_id,gender,birth_date,cadre_type,phone,marital_status,hire_date,
       job_title,facility,administration,department,qualification,specialty,
       governorate,city,contract_start,contract_end,end_reason,end_date,status,
-      dual_workplace,salary,job_grade,project,project_coverage,updated_at
-    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`,
+      dual_workplace,salary,job_grade,next_grade_eligibility,project,project_coverage,updated_at
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP)`,
       )
       .bind(
         employeeNo,
@@ -198,6 +199,7 @@ async function postHR(req: Request) {
         r.dualWorkplace || null,
         r.salary || null,
         r.jobGrade || null,
+        r.nextGradeEligibility || null,
         r.project || null,
         r.projectCoverage || null,
       )
