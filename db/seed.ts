@@ -167,7 +167,8 @@ export function ensureNormalizedSettings(){
   await ensureProjectAssignments();
   const db=getRawDb();
   const jtColumns=(await db.prepare("PRAGMA table_info(job_titles)").all()).results as {name:string}[];
-  if(!jtColumns.some(c=>c.name==="department_id")) await db.prepare("ALTER TABLE job_titles ADD COLUMN department_id INTEGER").run();\n  const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
+  if(!jtColumns.some(c=>c.name==="department_id")) await db.prepare("ALTER TABLE job_titles ADD COLUMN department_id INTEGER").run();
+  const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
   const projectNames=new Set(projectColumns.map(c=>c.name));
   if(!projectNames.has("start_date")) await db.prepare("ALTER TABLE projects ADD COLUMN start_date TEXT").run();
   if(!projectNames.has("end_date")) await db.prepare("ALTER TABLE projects ADD COLUMN end_date TEXT").run();
