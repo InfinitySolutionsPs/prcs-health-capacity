@@ -43,7 +43,7 @@ type D = {
   payroll: any;
   jobCodes: any[];
 };
-export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[]; projectJobs?: any[] };
+export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[]; projectJobs?: any[]; staffing?: any[] };
 const LOCATION_OPTIONS: Record<string,string[]> = {
   "المحافظات الجنوبية": ["رفح", "خانيونس"],
   "المحافظة الوسطى": ["دير البلح", "النصيرات", "البريج", "المغازي"],
@@ -153,7 +153,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     [q, setQ] = useState(""),
     [searchInput, setSearchInput] = useState(""),
     [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "على رأس عمله", cadreType: "", project: "" }),
-    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
+    [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [], staffing: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false),
     [detailEmployee, setDetailEmployee] = useState<any | null>(null),
@@ -662,9 +662,16 @@ export function EmployeeDialog({
   };
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => employeeForm(employee));
-  const jobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
+  const allJobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, jobTitleId: j.id, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
     .filter((j: any) => j.jobCode || j.jobTitle)
     .filter((j: any, i: number, all: any[]) => all.findIndex((x) => (x.jobCode || x.jobTitle) === (j.jobCode || j.jobTitle)) === i);
+  const selectedDepartment = departments.find((d: any) => d.name === form.department);
+  const linkedJobNames = (structure.staffing || [])
+    .filter((item: any) => (!selectedDepartment || item.departmentId === selectedDepartment.id || item.departmentName === form.department))
+    .map((item: any) => String(item.jobTitle || ""));
+  const jobOptions = form.department && linkedJobNames.length
+    ? allJobOptions.filter((job: any) => linkedJobNames.includes(String(job.jobTitle)) || job.jobTitle === form.jobTitle)
+    : allJobOptions;
   const set = (key: string, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
 
