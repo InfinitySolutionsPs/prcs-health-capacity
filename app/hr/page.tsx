@@ -156,7 +156,8 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false),
-    [detailEmployee, setDetailEmployee] = useState<any | null>(null);
+    [detailEmployee, setDetailEmployee] = useState<any | null>(null),
+    [detailProject, setDetailProject] = useState<string | null>(null);
   const load = useCallback(async () => {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=10000`);
     if (r.ok) setData(await r.json());
@@ -467,7 +468,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     <TableCell>{e.facility}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
-                    <TableCell>{e.project ? <button type="button" className="text-right text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailEmployee(e)}>{e.project}</button> : "—"}</TableCell>
+                    <TableCell>{e.project ? <button type="button" className="text-right text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailProject(e.project)}>{e.project}</button> : "—"}</TableCell>
                     <TableCell>{e.status}</TableCell>
                     <TableCell className="text-center">
                       <EmployeeDialog
@@ -490,6 +491,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
         </section>
       </div>
       <EmployeeDetailsDialog employee={detailEmployee} onClose={() => setDetailEmployee(null)} jobCodes={data?.jobCodes || []} structure={structure} cadreOptions={cadreOptions} onSaved={load} />
+      <ProjectDetailsDialog projectName={detailProject} onClose={() => setDetailProject(null)} projects={structure.projects || []} projectJobs={structure.projectJobs || []} employees={data?.employees || []} />
       <Dialog open={exportOpen} onOpenChange={setExportOpen}><DialogContent dir="rtl" className="text-right sm:max-w-lg"><DialogHeader className="text-right"><DialogTitle>اختيار أعمدة التصدير</DialogTitle><DialogDescription>سيتم تصدير نتائج البحث الحالية مرتبة حسب الإدارة.</DialogDescription></DialogHeader><div className="grid grid-cols-2 gap-2">{exportFields.map(([key,label])=><label key={key} className="flex items-center gap-2 rounded-lg bg-[#f7f9fa] p-2"><input type="checkbox" checked={selectedExportFields.includes(key)} onChange={e=>setSelectedExportFields(v=>e.target.checked?[...v,key]:v.filter(x=>x!==key))}/><span>{label}</span></label>)}</div><DialogFooter><Button type="button" disabled={!selectedExportFields.length} onClick={exportEmployees} className="w-full gap-2 bg-[#18794e] hover:bg-[#12623e]"><FileSpreadsheet className="size-4"/>تنزيل الملف</Button></DialogFooter></DialogContent></Dialog>
       <Toaster richColors />
     </main>
@@ -978,6 +980,36 @@ function EmployeeDetailsDialog({ employee, onClose, jobCodes, structure, cadreOp
       </Dialog>
       {employee && <EmployeeDialog employee={employee} jobCodes={jobCodes} structure={structure} cadreOptions={cadreOptions} onSaved={async () => { await onSaved(); setEditOpen(false); onClose(); }} open={editOpen} onOpenChange={setEditOpen} hideTrigger />}
     </>
+  );
+}
+
+
+function ProjectDetailsDialog({ projectName, onClose, projects, projectJobs, employees }: { projectName: string | null; onClose: () => void; projects: any[]; projectJobs: any[]; employees: any[] }) {
+  const project = projects.find((item: any) => String(item.name || item.project || "") === String(projectName || ""));
+  const jobs = projectJobs.filter((item: any) => String(item.projectName || item.project || "") === String(projectName || ""));
+  const assigned = employees.filter((item: any) => String(item.project || "") === String(projectName || ""));
+  return (
+    <Dialog open={Boolean(projectName)} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent dir="rtl" className="max-h-[92dvh] overflow-y-auto text-right sm:max-w-5xl">
+        <DialogHeader className="text-right">
+          <DialogTitle>تفاصيل المشروع: {projectName || "—"}</DialogTitle>
+          <DialogDescription>بيانات المشروع والوظائف والموظفون المرتبطون به.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">اسم المشروع</div><div className="mt-1 font-semibold">{projectName || "—"}</div></div>
+          <div className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">بداية المشروع</div><div className="mt-1 font-semibold">{project?.startDate || project?.start_date || "—"}</div></div>
+          <div className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">نهاية المشروع</div><div className="mt-1 font-semibold">{project?.endDate || project?.end_date || "—"}</div></div>
+          <div className="rounded-xl border bg-[#f7f9fa] p-3"><div className="text-xs text-[#6b7681]">عدد الموظفين</div><div className="mt-1 font-semibold">{n.format(assigned.length)}</div></div>
+        </div>
+        <div className="overflow-x-auto rounded-xl border">
+          <Table>
+            <TableHeader><TableRow><TableHead className="text-right">المسمى الوظيفي</TableHead><TableHead className="text-right">الميزانية</TableHead><TableHead className="text-right">العدد المطلوب</TableHead><TableHead className="text-right">التغطية</TableHead></TableRow></TableHeader>
+            <TableBody>{jobs.length ? jobs.map((job: any, index: number) => <TableRow key={job.id || index}><TableCell>{job.jobTitle || job.job_title || "—"}</TableCell><TableCell>{job.salary || job.budget || "—"}</TableCell><TableCell>{job.requiredStaff || job.required_staff || "—"}</TableCell><TableCell>{job.coverage == null ? "—" : String(job.coverage) + "%"}</TableCell></TableRow>) : <TableRow><TableCell colSpan={4} className="text-center text-[#6b7681]">لا توجد وظائف مسجلة لهذا المشروع</TableCell></TableRow>}</TableBody>
+          </Table>
+        </div>
+        <div className="rounded-xl border p-3"><h3 className="mb-2 font-bold">الموظفون المرتبطون بالمشروع</h3>{assigned.length ? <div className="grid gap-2 sm:grid-cols-2">{assigned.map((item: any) => <div key={item.id} className="rounded-lg bg-[#f7f9fa] p-2">{item.full_name} — {item.job_title || "بدون مسمى"}</div>)}</div> : <p className="text-sm text-[#6b7681]">لا يوجد موظفون مرتبطون بهذا المشروع.</p>}</div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
