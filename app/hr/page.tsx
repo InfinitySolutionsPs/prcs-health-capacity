@@ -662,8 +662,15 @@ export function EmployeeDialog({
   };
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => employeeForm(employee));
+  const departmentsByJob = new Map<string, string[]>();
+  for (const item of structure.staffing || []) {
+    const title = String(item.jobTitle || "");
+    const department = String(item.departmentName || "");
+    if (title && department) departmentsByJob.set(title, [...new Set([...(departmentsByJob.get(title) || []), department])]);
+  }
   const allJobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, jobTitleId: j.id, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
     .filter((j: any) => j.jobCode || j.jobTitle)
+    .map((j: any) => ({ ...j, departmentNames: departmentsByJob.get(String(j.jobTitle)) || [] }))
     .filter((j: any, i: number, all: any[]) => all.findIndex((x) => (x.jobCode || x.jobTitle) === (j.jobCode || j.jobTitle)) === i);
   const selectedDepartment = structure.departments.find((d: any) => d.name === form.department);
   const linkedJobNames = (structure.staffing || [])
@@ -853,14 +860,14 @@ export function EmployeeDialog({
                 <option value="">اختر المسمى الوظيفي</option>
                 {jobOptions.map((job) => (
                   <option key={job.jobCode || job.jobTitle} value={job.jobCode || job.jobTitle}>
-                    {job.mainAdministration || ""}{job.mainAdministration ? " — " : ""}{job.jobTitle || job.name} {job.jobCode ? `(${job.jobCode})` : ""}
+                    {(job.departmentNames?.length ? job.departmentNames.join("، ") : form.department) || "بدون قسم محدد"} — {job.jobTitle || job.name} {job.jobCode ? `(${job.jobCode})` : ""}
                   </option>
                 ))}
               </select>
             </label>
             <ReadOnly
-              label="الدائرة الرئيسية"
-              value={form.mainAdministration || "تُحدد من المسمى"}
+              label="القسم التابع"
+              value={form.department || "يُحدد بعد اختيار القسم"}
             />
             <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
             <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
