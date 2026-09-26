@@ -21,7 +21,7 @@ async function ensureCoreSchema(){
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_administrations_hospital_name ON administrations(hospital_id,name)"),
     db.prepare("CREATE TABLE IF NOT EXISTS departments (id INTEGER PRIMARY KEY AUTOINCREMENT, hospital_id INTEGER NOT NULL, administration_id INTEGER, division TEXT NOT NULL DEFAULT 'غير محدد', name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_departments_hospital_division_name ON departments(hospital_id,division,name)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS job_titles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, main_administration TEXT, category_code TEXT, job_code TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS job_titles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, department_id INTEGER, main_administration TEXT, category_code TEXT, job_code TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name ON job_titles(name)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_job_code ON job_titles(job_code)"),
     db.prepare("CREATE TABLE IF NOT EXISTS staffing (id INTEGER PRIMARY KEY AUTOINCREMENT, department_id INTEGER NOT NULL, job_title_id INTEGER, job_title TEXT NOT NULL, required INTEGER NOT NULL DEFAULT 0, available INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
@@ -166,7 +166,7 @@ export function ensureNormalizedSettings(){
   await ensureEmployeeSeed();
   await ensureProjectAssignments();
   const db=getRawDb();
-  const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
+  const jtColumns=(await db.prepare("PRAGMA table_info(job_titles)").all()).results as {name:string}[];\n  if(!jtColumns.some(c=>c.name==="department_id")) await db.prepare("ALTER TABLE job_titles ADD COLUMN department_id INTEGER").run();\n  const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
   const projectNames=new Set(projectColumns.map(c=>c.name));
   if(!projectNames.has("start_date")) await db.prepare("ALTER TABLE projects ADD COLUMN start_date TEXT").run();
   if(!projectNames.has("end_date")) await db.prepare("ALTER TABLE projects ADD COLUMN end_date TEXT").run();
