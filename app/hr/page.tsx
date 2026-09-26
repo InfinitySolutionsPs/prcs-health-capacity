@@ -665,7 +665,7 @@ export function EmployeeDialog({
   const allJobOptions = [...jobCodes, ...(structure.jobTitles || []).map((j: any) => ({ jobCode: j.jobCode, jobTitle: j.name, jobTitleId: j.id, categoryCode: j.categoryCode, mainAdministration: j.mainAdministration }))]
     .filter((j: any) => j.jobCode || j.jobTitle)
     .filter((j: any, i: number, all: any[]) => all.findIndex((x) => (x.jobCode || x.jobTitle) === (j.jobCode || j.jobTitle)) === i);
-  const selectedDepartment = departments.find((d: any) => d.name === form.department);
+  const selectedDepartment = structure.departments.find((d: any) => d.name === form.department);
   const linkedJobNames = (structure.staffing || [])
     .filter((item: any) => (!selectedDepartment || item.departmentId === selectedDepartment.id || item.departmentName === form.department))
     .map((item: any) => String(item.jobTitle || ""));
