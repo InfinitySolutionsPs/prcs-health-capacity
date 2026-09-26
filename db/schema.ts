@@ -167,6 +167,7 @@ export const employees = sqliteTable(
     dualWorkplace: text("dual_workplace"),
     salary: text("salary"),
     jobGrade: text("job_grade"),
+    nextGradeEligibility: text("next_grade_eligibility"),
     project: text("project"),
     projectCoverage: text("project_coverage"),
     createdAt: text("created_at")
@@ -181,6 +182,30 @@ export const employees = sqliteTable(
     uniqueIndex("idx_employees_employee_code").on(t.employeeCode),
   ],
 );
+
+export const employeeLeaves = sqliteTable("employee_leaves", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  employeeNo: text("employee_no").notNull(),
+  employeeName: text("employee_name").notNull(),
+  leaveType: text("leave_type").notNull(),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
+  days: integer("days").notNull(),
+  status: text("status").notNull().default("مقدمة"),
+  notes: text("notes"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
+
+export const employeePenalties = sqliteTable("employee_penalties", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  employeeNo: text("employee_no").notNull(),
+  employeeName: text("employee_name").notNull(),
+  penaltyType: text("penalty_type").notNull(),
+  incidentDate: text("incident_date").notNull(),
+  description: text("description").notNull(),
+  deductionAmount: text("deduction_amount").notNull().default("0"),
+  createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});
 
 export const payrollEntries = sqliteTable(
   "payroll_entries",
