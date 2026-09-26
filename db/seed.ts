@@ -30,7 +30,7 @@ async function ensureCoreSchema(){
     db.prepare("CREATE TABLE IF NOT EXISTS system_users (id INTEGER PRIMARY KEY AUTOINCREMENT, auth_user_id TEXT, username TEXT, password_hash TEXT, email TEXT NOT NULL, name TEXT NOT NULL, role TEXT NOT NULL DEFAULT 'viewer', active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_system_users_email ON system_users(email)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_system_users_auth_user_id ON system_users(auth_user_id)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, first_name TEXT, father_name TEXT, grandfather_name TEXT, family_name TEXT, employee_code TEXT, job_code TEXT, category_code TEXT, main_administration TEXT, full_name TEXT NOT NULL, national_id TEXT, gender TEXT, birth_date TEXT, cadre_type TEXT, phone TEXT, marital_status TEXT, hire_date TEXT, job_title TEXT NOT NULL, facility TEXT NOT NULL, administration TEXT, department TEXT, qualification TEXT, specialty TEXT, governorate TEXT, city TEXT, contract_start TEXT, contract_end TEXT, end_reason TEXT, end_date TEXT, status TEXT NOT NULL DEFAULT 'على رأس عمله', dual_workplace TEXT, salary TEXT, job_grade TEXT, project TEXT, project_coverage TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS employees (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, first_name TEXT, father_name TEXT, grandfather_name TEXT, family_name TEXT, employee_code TEXT, job_code TEXT, category_code TEXT, main_administration TEXT, full_name TEXT NOT NULL, national_id TEXT, gender TEXT, birth_date TEXT, cadre_type TEXT, phone TEXT, marital_status TEXT, hire_date TEXT, job_title TEXT NOT NULL, facility TEXT NOT NULL, administration TEXT, department TEXT, qualification TEXT, specialty TEXT, governorate TEXT, city TEXT, contract_start TEXT, contract_end TEXT, end_reason TEXT, end_date TEXT, status TEXT NOT NULL DEFAULT 'على رأس عمله', dual_workplace TEXT, salary TEXT, job_grade TEXT, next_grade_eligibility TEXT, project TEXT, project_coverage TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_employee_no ON employees(employee_no)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_employee_code ON employees(employee_code)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_employees_full_name ON employees(full_name)"),
@@ -41,6 +41,10 @@ async function ensureCoreSchema(){
     db.prepare("CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status)"),
     db.prepare("CREATE TABLE IF NOT EXISTS payroll_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, period TEXT NOT NULL, project TEXT NOT NULL, facility TEXT, administration TEXT, gross TEXT NOT NULL DEFAULT '0', deductions TEXT NOT NULL DEFAULT '0', net TEXT NOT NULL DEFAULT '0', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_payroll_employee_period_project ON payroll_entries(employee_no,period,project)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS employee_leaves (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, leave_type TEXT NOT NULL, start_date TEXT NOT NULL, end_date TEXT NOT NULL, days INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'مقدمة', notes TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_employee_leaves_employee_date ON employee_leaves(employee_no,start_date)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS employee_penalties (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_no TEXT NOT NULL, employee_name TEXT NOT NULL, penalty_type TEXT NOT NULL, incident_date TEXT NOT NULL, description TEXT NOT NULL, deduction_amount TEXT NOT NULL DEFAULT '0', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_employee_penalties_employee_date ON employee_penalties(employee_no,incident_date)"),
     db.prepare("CREATE TABLE IF NOT EXISTS projects (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE TABLE IF NOT EXISTS project_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, job_title_id INTEGER NOT NULL, salary TEXT NOT NULL DEFAULT '0', coverage TEXT NOT NULL DEFAULT '100', created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_project_jobs_project_title ON project_jobs(project_id,job_title_id)"),
@@ -61,6 +65,9 @@ export async function ensureEmployeeFields(){
   await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
   await db.batch(DEFAULT_CADRE_TYPES.map(name=>db.prepare("INSERT OR IGNORE INTO cadre_types (name) VALUES (?)").bind(name)));
   await db.batch(DEFAULT_PROJECTS.map(name=>db.prepare("INSERT OR IGNORE INTO projects (name) VALUES (?)").bind(name)));
+  const employeeColumns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
+  const employeeNames=new Set(employeeColumns.map(c=>c.name));
+  if(!employeeNames.has("next_grade_eligibility")) await db.prepare("ALTER TABLE employees ADD COLUMN next_grade_eligibility TEXT").run();
   const done=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind(EMPLOYEE_FIELDS_KEY).first();
   if(done)return;
   const columns=(await db.prepare("PRAGMA table_info(employees)").all()).results as {name:string}[];
