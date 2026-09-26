@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     const notes = String(body.notes || "").trim();
     const db = getRawDb();
     const employee = await db.prepare("SELECT employee_no,full_name FROM employees WHERE employee_no=?").bind(employeeNo).first<{ employee_no: string; full_name: string }>();
-    if (!employee || !leaveType || !/^\\d{4}-\\d{2}-\\d{2}$/.test(startDate) || !/^\\d{4}-\\d{2}-\\d{2}$/.test(endDate) || endDate < startDate || !Number.isInteger(days) || days < 1)
+    if (!employee || !leaveType || !/^\d{4}-\d{2}-\d{2}$/.test(startDate) || !/^\d{4}-\d{2}-\d{2}$/.test(endDate) || endDate < startDate || !Number.isInteger(days) || days < 1)
       return NextResponse.json({ error: "تحقق من الموظف ونوع الإجازة والتواريخ وعدد الأيام" }, { status: 400 });
     const result = await db.prepare("INSERT INTO employee_leaves(employee_no,employee_name,leave_type,start_date,end_date,days,notes) VALUES(?,?,?,?,?,?,?)")
       .bind(employee.employee_no, employee.full_name, leaveType, startDate, endDate, days, notes || null).run();
