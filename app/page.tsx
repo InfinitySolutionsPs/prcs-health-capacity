@@ -1,8 +1,9 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import { Building2, ChartNoAxesColumnIncreasing, Check, Search, ChevronsUpDown, CirclePlus, Eye, FileDown, FileSpreadsheet, Landmark, Layers3, LogOut, Pencil, Printer, Settings, Stethoscope, Trash2, UserCog, UsersRound, WalletCards } from "lucide-react";
+import { Building2, ChartNoAxesColumnIncreasing, Check, Search, ChevronsUpDown, CirclePlus, Eye, FileDown, FileSpreadsheet, Landmark, Layers3, LogOut, Pencil, Printer, Settings, Stethoscope, Trash2, UserCog, UsersRound, WalletCards, CalendarDays, ShieldAlert, Banknote } from "lucide-react";
 import { EmployeeImportView, HRView } from "./hr/page";
+import { LeavesModule, PenaltiesModule, PayrollModule } from "./hr/modules";
 import { IntegratedCapacity } from "@/components/integrated-capacity";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ type Staffing={id:number;hospitalId:number;hospitalName:string;departmentId:numb
 type ProjectJob={id:number;projectId:number;projectName:string;jobTitleId:number;jobTitle:string;jobCode?:string;salary:string;coverage:string;requiredCount:number;employeesCount?:number};
 type Data={hospitals:HospitalRow[];administrations:Administration[];departments:Department[];jobTitles:JobTitle[];cadreTypes:{id:number;name:string}[];projects:{id:number;name:string;startDate?:string;endDate?:string;budgetSpent?:number}[];projectJobs:ProjectJob[];staffing:Staffing[]};
 type Role="admin"|"editor"|"viewer";type AuthUser={id:number;email:string;name:string;role:Role};type SystemUser={id:number;email:string;name:string;role:Role;active:number};
-type View="dashboard"|"entry"|"settings"|"users"|"hr"|"employeeImport"|"integrated"|"projectJobs";
+type View="dashboard"|"entry"|"settings"|"users"|"hr"|"employeeImport"|"integrated"|"projectJobs"|"leaves"|"penalties"|"payroll";
 
 declare global { interface Document { modelContext?: { registerTool:(tool:unknown, options?:{signal?:AbortSignal})=>void|Promise<void> } } }
 
@@ -85,12 +86,15 @@ export default function Home(){
         {authUser.role==="admin"&&<NavButton active={view==="settings"} onClick={()=>setView("settings")} icon={<Settings/>}>الإعدادات</NavButton>}
         {authUser.role==="admin"&&<NavButton active={view==="users"} onClick={()=>setView("users")} icon={<UserCog/>}>المستخدمون والصلاحيات</NavButton>}
         <NavButton active={view==="hr"} onClick={()=>setView("hr")} icon={<UsersRound/>}>الموظفون والإحصائيات</NavButton>
+        <NavButton active={view==="leaves"} onClick={()=>setView("leaves")} icon={<CalendarDays/>}>الإجازات</NavButton>
+        <NavButton active={view==="penalties"} onClick={()=>setView("penalties")} icon={<ShieldAlert/>}>العقوبات</NavButton>
+        <NavButton active={view==="payroll"} onClick={()=>setView("payroll")} icon={<Banknote/>}>الرواتب</NavButton>
         {authUser.role==="admin"&&<NavButton active={view==="employeeImport"} onClick={()=>setView("employeeImport")} icon={<FileSpreadsheet/>}>استيراد الموظفين</NavButton>}
         <NavButton active={view==="integrated"} onClick={()=>setView("integrated")} icon={<Layers3/>}>القدرة والموظفون</NavButton>
         {authUser.role==="admin"&&<NavButton active={view==="projectJobs"} onClick={()=>setView("projectJobs")} icon={<WalletCards/>}>وظائف المشاريع</NavButton>}
         <div className="mx-3 mt-5 border-t border-[#e7ebee] pt-4 text-xs leading-6 text-[#7a858f]">تُدار المراكز والإدارات والأقسام والمسميات الثابتة من الإعدادات.</div>
       </aside>
-      <section className="min-w-0">{view==="dashboard"?<Dashboard loading={loading} data={data} rows={rows} totals={totals} coverage={coverage} hospitalFilter={hospitalFilter} setHospitalFilter={setHospitalFilter} administrationFilter={administrationFilter} setAdministrationFilter={setAdministrationFilter} departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter} jobTitleFilter={jobTitleFilter} setJobTitleFilter={setJobTitleFilter} administrations={selectedAdministrations} departments={selectedDepartments} filteredJobTitles={filteredJobTitles} reload={load} canEdit={canEdit} deficitOnly={deficitOnly} setDeficitOnly={setDeficitOnly}/>:view==="entry"?<EntryForms data={data} reload={load}/>:view==="settings"?<SettingsView data={data} reload={load}/>:view==="users"?<UsersView currentUser={authUser}/>:view==="integrated"?<IntegratedCapacity/>:view==="employeeImport"?<EmployeeImportView onImported={load}/>:view==="projectJobs"?<ProjectJobsView data={data} reload={load}/>:<HRView embedded/>}</section>
+      <section className="min-w-0">{view==="dashboard"?<Dashboard loading={loading} data={data} rows={rows} totals={totals} coverage={coverage} hospitalFilter={hospitalFilter} setHospitalFilter={setHospitalFilter} administrationFilter={administrationFilter} setAdministrationFilter={setAdministrationFilter} departmentFilter={departmentFilter} setDepartmentFilter={setDepartmentFilter} jobTitleFilter={jobTitleFilter} setJobTitleFilter={setJobTitleFilter} administrations={selectedAdministrations} departments={selectedDepartments} filteredJobTitles={filteredJobTitles} reload={load} canEdit={canEdit} deficitOnly={deficitOnly} setDeficitOnly={setDeficitOnly}/>:view==="entry"?<EntryForms data={data} reload={load}/>:view==="settings"?<SettingsView data={data} reload={load}/>:view==="users"?<UsersView currentUser={authUser}/>:view==="integrated"?<IntegratedCapacity/>:view==="employeeImport"?<EmployeeImportView onImported={load}/>:view==="projectJobs"?<ProjectJobsView data={data} reload={load}/>:view==="leaves"?<LeavesModule canEdit={canEdit} isAdmin={authUser.role==="admin"}/>:view==="penalties"?<PenaltiesModule canEdit={canEdit} isAdmin={authUser.role==="admin"}/>:view==="payroll"?<PayrollModule/>:<HRView embedded/>}</section>
     </div><Toaster position="top-center" richColors />
   </main>
 }
