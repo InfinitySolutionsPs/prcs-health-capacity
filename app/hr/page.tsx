@@ -126,8 +126,7 @@ async function parseEmployeeWorkbook(file: File) {
 }
 
 export function EmployeeImportView({ onImported }: { onImported?: () => Promise<void> }) {
-  const [busy, setBusy] = useState(false),
-    [detailEmployee, setDetailEmployee] = useState<any | null>(null);
+  const [busy, setBusy] = useState(false);
   const [result, setResult] = useState("");
   async function importEmployees(file: File) {
     try {
@@ -156,7 +155,8 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     [filters, setFilters] = useState({ jobTitle: "", facility: "", administration: "", department: "", status: "على رأس عمله", cadreType: "", project: "" }),
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [detailEmployee, setDetailEmployee] = useState<any | null>(null);
   const load = useCallback(async () => {
     const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=10000`);
     if (r.ok) setData(await r.json());
