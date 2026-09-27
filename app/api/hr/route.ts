@@ -13,7 +13,14 @@ export async function GET(req: Request) {
     pageSize = Math.min(100, Math.max(1, Number(u.searchParams.get("pageSize") || 25))),
     filters = ["jobTitle", "facility", "administration", "department", "status", "cadreType", "project"] as const;
   const db = getRawDb();
-  await ensureNormalizedSettings();
+  // Settings and the one-time seed include unrelated tables. A problem while
+  // normalizing one of those tables must not hide an employee register that
+  // is already present in the database.
+  try {
+    await ensureNormalizedSettings();
+  } catch (error) {
+    console.error("HR data initialization failed; continuing with existing employees", error);
+  }
   const filterColumns = { jobTitle: "job_title", facility: "facility", administration: "administration", department: "department", status: "status", cadreType: "cadre_type", project: "project" } as const;
   const clauses: string[] = [];
   const args: string[] = [];
@@ -26,50 +33,41 @@ export async function GET(req: Request) {
     if (value) { clauses.push(`${filterColumns[key]} = ?`); args.push(value); }
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-  const [employees, filteredCount, seededCount, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles, cadreTypes, filterOptions] =
+  // Fetch the employee rows and their counts first. These are the essential
+  // data for this screen; auxiliary dashboard/settings queries are isolated
+  // below so one missing optional table cannot turn the whole page into HTTP 500.
+  let employees: { results: unknown[] };
+  let filteredCount: { count: number } | null;
+  let seededCount: { count: number } | null;
+  try {
+    employees = await db
+      .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ? OFFSET ?`)
+      .bind(...args, paged ? pageSize : limit, paged ? (page - 1) * pageSize : 0)
+      .all() as { results: unknown[] };
+    filteredCount = await db.prepare(`SELECT COUNT(*) AS count FROM employees ${where}`).bind(...args).first<{count:number}>();
+    seededCount = await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
+  } catch (error) {
+    console.error("HR employee register query failed", error);
+    return NextResponse.json({ error: "تعذر قراءة سجل الموظفين من قاعدة البيانات" }, { status: 500 });
+  }
+  const optional = async <T,>(name: string, run: () => Promise<T>, fallback: T): Promise<T> => {
+    try { return await run(); }
+    catch (error) { console.error(`HR auxiliary query failed: ${name}`, error); return fallback; }
+  };
+  const [summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles, cadreTypes, filterOptions] =
     await Promise.all([
-      db
-        .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ? OFFSET ?`)
-        .bind(...args, paged ? pageSize : limit, paged ? (page - 1) * pageSize : 0)
-        .all(),
-      db.prepare(`SELECT COUNT(*) AS count FROM employees ${where}`).bind(...args).first<{count:number}>(),
-      db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>(),
-      db
-        .prepare(
-          "SELECT COUNT(*) total, SUM(CASE WHEN status='على رأس عمله' THEN 1 ELSE 0 END) active, COUNT(DISTINCT facility) facilities, COUNT(DISTINCT job_title) jobs FROM employees",
-        )
-        .first(),
-      db
-        .prepare(
-          "SELECT facility name,COUNT(*) value FROM employees WHERE status='على رأس عمله' GROUP BY facility ORDER BY value DESC",
-        )
-        .all(),
-      db
-        .prepare(
-          "SELECT status name,COUNT(*) value FROM employees GROUP BY status ORDER BY value DESC",
-        )
-        .all(),
-      db
-        .prepare(
-          "SELECT cadre_type name,COUNT(*) value FROM employees WHERE status='على رأس عمله' GROUP BY cadre_type ORDER BY value DESC",
-        )
-        .all(),
-      db
-        .prepare(
-          "SELECT COUNT(*) entries,COUNT(DISTINCT employee_no) employees,COUNT(DISTINCT project) projects,COALESCE(SUM(CAST(gross AS REAL)),0) gross,COALESCE(SUM(CAST(net AS REAL)),0) net FROM payroll_entries",
-        )
-        .first(),
-      db
-        .prepare(
-          "SELECT job_code AS jobCode,job_title AS jobTitle,category_code AS categoryCode,main_administration AS mainAdministration,COUNT(*) employeeCount FROM employees WHERE job_code IS NOT NULL GROUP BY job_code,job_title,category_code,main_administration ORDER BY main_administration,job_title",
-        )
-        .all(),
-      db.prepare("SELECT id,name FROM hospitals ORDER BY name").all(),
-      db.prepare("SELECT a.id,a.hospital_id AS hospitalId,a.name,h.name AS hospitalName FROM administrations a JOIN hospitals h ON h.id=a.hospital_id ORDER BY h.name,a.name").all(),
-      db.prepare("SELECT d.id,d.hospital_id AS hospitalId,d.administration_id AS administrationId,COALESCE(a.name,d.division) AS administration,d.name,h.name AS hospitalName FROM departments d JOIN hospitals h ON h.id=d.hospital_id LEFT JOIN administrations a ON a.id=d.administration_id ORDER BY h.name,administration,d.name").all(),
-      db.prepare("SELECT id,name,active,main_administration AS mainAdministration,category_code AS categoryCode,job_code AS jobCode FROM job_titles WHERE active=1 ORDER BY name").all(),
-      db.prepare("SELECT id,name FROM cadre_types ORDER BY name").all(),
-      db.prepare("SELECT 'jobTitle' AS kind,job_title AS value FROM employees WHERE job_title IS NOT NULL AND job_title<>'' UNION SELECT 'facility',facility FROM employees WHERE facility IS NOT NULL AND facility<>'' UNION SELECT 'administration',administration FROM employees WHERE administration IS NOT NULL AND administration<>'' UNION SELECT 'department',department FROM employees WHERE department IS NOT NULL AND department<>'' UNION SELECT 'project',project FROM employees WHERE project IS NOT NULL AND project<>'' UNION SELECT 'cadreType',cadre_type FROM employees WHERE cadre_type IS NOT NULL AND cadre_type<>'' ORDER BY kind,value").all(),
+      optional("summary", () => db.prepare("SELECT COUNT(*) total, SUM(CASE WHEN status='على رأس عمله' THEN 1 ELSE 0 END) active, COUNT(DISTINCT facility) facilities, COUNT(DISTINCT job_title) jobs FROM employees").first(), null),
+      optional("facilities", () => db.prepare("SELECT facility name,COUNT(*) value FROM employees WHERE status='على رأس عمله' GROUP BY facility ORDER BY value DESC").all(), {results: []}),
+      optional("statuses", () => db.prepare("SELECT status name,COUNT(*) value FROM employees GROUP BY status ORDER BY value DESC").all(), {results: []}),
+      optional("cadres", () => db.prepare("SELECT cadre_type name,COUNT(*) value FROM employees WHERE status='على رأس عمله' GROUP BY cadre_type ORDER BY value DESC").all(), {results: []}),
+      optional("payroll", () => db.prepare("SELECT COUNT(*) entries,COUNT(DISTINCT employee_no) employees,COUNT(DISTINCT project) projects,COALESCE(SUM(CAST(gross AS REAL)),0) gross,COALESCE(SUM(CAST(net AS REAL)),0) net FROM payroll_entries").first(), null),
+      optional("job codes", () => db.prepare("SELECT job_code AS jobCode,job_title AS jobTitle,category_code AS categoryCode,main_administration AS mainAdministration,COUNT(*) employeeCount FROM employees WHERE job_code IS NOT NULL GROUP BY job_code,job_title,category_code,main_administration ORDER BY main_administration,job_title").all(), {results: []}),
+      optional("hospitals", () => db.prepare("SELECT id,name FROM hospitals ORDER BY name").all(), {results: []}),
+      optional("administrations", () => db.prepare("SELECT a.id,a.hospital_id AS hospitalId,a.name,h.name AS hospitalName FROM administrations a JOIN hospitals h ON h.id=a.hospital_id ORDER BY h.name,a.name").all(), {results: []}),
+      optional("departments", () => db.prepare("SELECT d.id,d.hospital_id AS hospitalId,d.administration_id AS administrationId,COALESCE(a.name,d.division) AS administration,d.name,h.name AS hospitalName FROM departments d JOIN hospitals h ON h.id=d.hospital_id LEFT JOIN administrations a ON a.id=d.administration_id ORDER BY h.name,administration,d.name").all(), {results: []}),
+      optional("job titles", () => db.prepare("SELECT id,name,active,main_administration AS mainAdministration,category_code AS categoryCode,job_code AS jobCode FROM job_titles WHERE active=1 ORDER BY name").all(), {results: []}),
+      optional("cadre types", () => db.prepare("SELECT id,name FROM cadre_types ORDER BY name").all(), {results: []}),
+      optional("filter options", () => db.prepare("SELECT 'jobTitle' AS kind,job_title AS value FROM employees WHERE job_title IS NOT NULL AND job_title<>'' UNION SELECT 'facility',facility FROM employees WHERE facility IS NOT NULL AND facility<>'' UNION SELECT 'administration',administration FROM employees WHERE administration IS NOT NULL AND administration<>'' UNION SELECT 'department',department FROM employees WHERE department IS NOT NULL AND department<>'' UNION SELECT 'project',project FROM employees WHERE project IS NOT NULL AND project<>'' UNION SELECT 'cadreType',cadre_type FROM employees WHERE cadre_type IS NOT NULL AND cadre_type<>'' ORDER BY kind,value").all(), {results: []}),
     ]);
   const optionRows = filterOptions.results as {kind:string;value:string}[];
   const options = Object.fromEntries(["jobTitle", "facility", "administration", "department", "project", "cadreType"].map(kind => [kind, optionRows.filter(row => row.kind === kind).map(row => row.value)]));
