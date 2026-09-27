@@ -159,6 +159,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     [structure, setStructure] = useState<Structure>({ hospitals: [], administrations: [], departments: [], cadreTypes: [], projects: [], staffing: [] }),
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false),
+    [loadError, setLoadError] = useState(""), [loadingEmployees, setLoadingEmployees] = useState(true),
     [detailEmployee, setDetailEmployee] = useState<any | null>(null),
     [detailProject, setDetailProject] = useState<string | null>(null),
     [projectEmployees, setProjectEmployees] = useState<any[]>([]);
@@ -168,8 +169,19 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     return params.toString();
   }, [q, page, pageSize, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType, filters.project]);
   const load = useCallback(async () => {
-    const r = await fetch(`/api/hr?${employeeQuery()}`);
-    if (r.ok) setData(await r.json());
+    setLoadingEmployees(true);
+    setLoadError("");
+    try {
+      const r = await fetch(`/api/hr?${employeeQuery()}`);
+      const body = await r.json().catch(() => null);
+      if (!r.ok) throw new Error(body?.error || `تعذر تحميل سجل الموظفين (HTTP ${r.status})`);
+      if (!body || !Array.isArray(body.employees)) throw new Error("استجابة بيانات الموظفين غير مكتملة");
+      setData(body);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "تعذر تحميل سجل الموظفين");
+    } finally {
+      setLoadingEmployees(false);
+    }
   }, [employeeQuery]);
   useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType, filters.project]);
   useEffect(() => {
@@ -438,8 +450,9 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <Breakdown title="حسب نوع الكادر" rows={data?.cadres} />
         </section>
         <section className="overflow-hidden rounded-2xl border bg-white">
+          {loadError && <div role="alert" className="m-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800"><span>{loadError}</span><Button type="button" variant="outline" size="sm" onClick={() => void load()}>إعادة تحميل البيانات</Button></div>}
           <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-bold">سجل الموظفين <span className="text-sm font-normal text-[#6b7681]">({n.format(filteredCount)})</span></h2>
+            <h2 className="font-bold">سجل الموظفين <span className="text-sm font-normal text-[#6b7681]">({data ? n.format(filteredCount) : loadingEmployees ? "جارٍ التحميل" : "—"})</span></h2>
             <div className="relative w-full sm:w-80">
               <Search className="absolute right-3 top-3 size-4 text-gray-400" />
               <Input
@@ -486,11 +499,12 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     </TableCell>
                   </TableRow>
                 ))}
+                {!visibleEmployees.length && <TableRow><TableCell colSpan={7} className="py-10 text-center text-[#7a858f]">{loadError ? "تعذر جلب البيانات؛ راجع رسالة الخطأ أعلاه." : loadingEmployees ? "جارٍ تحميل الموظفين..." : "لا توجد نتائج مطابقة"}</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#fafbfc] p-3 text-sm">
-            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {n.format(filteredCount)}</span></div>
+            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {data ? n.format(filteredCount) : "—"}</span></div>
             <div className="flex items-center gap-2"><Button type="button" variant="outline" size="sm" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><span>صفحة {page} من {totalPages}</span><Button type="button" variant="outline" size="sm" disabled={page>=totalPages} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
           </div>
         </section>
