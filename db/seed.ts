@@ -22,7 +22,7 @@ async function ensureCoreSchema(){
     db.prepare("CREATE TABLE IF NOT EXISTS departments (id INTEGER PRIMARY KEY AUTOINCREMENT, hospital_id INTEGER NOT NULL, administration_id INTEGER, division TEXT NOT NULL DEFAULT 'غير محدد', name TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_departments_hospital_division_name ON departments(hospital_id,division,name)"),
     db.prepare("CREATE TABLE IF NOT EXISTS job_titles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, department_id INTEGER, main_administration TEXT, category_code TEXT, job_code TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
-    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name ON job_titles(name)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name_administration ON job_titles(name,main_administration)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_job_code ON job_titles(job_code)"),
     db.prepare("CREATE TABLE IF NOT EXISTS staffing (id INTEGER PRIMARY KEY AUTOINCREMENT, department_id INTEGER NOT NULL, job_title_id INTEGER, job_title TEXT NOT NULL, required INTEGER NOT NULL DEFAULT 0, available INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_staffing_department_job ON staffing(department_id,job_title)"),
@@ -173,6 +173,10 @@ export function ensureNormalizedSettings(){
   await ensureEmployeeSeed();
   await ensureProjectAssignments();
   const db=getRawDb();
+  // A fixed title may be shared by multiple administrations, but not repeated
+  // within the same administration. Replace the legacy global-name constraint.
+  await db.prepare("DROP INDEX IF EXISTS idx_job_titles_name").run();
+  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name_administration ON job_titles(name,main_administration)").run();
   const jtColumns=(await db.prepare("PRAGMA table_info(job_titles)").all()).results as {name:string}[];
   if(!jtColumns.some(c=>c.name==="department_id")) await db.prepare("ALTER TABLE job_titles ADD COLUMN department_id INTEGER").run();
   const projectColumns=(await db.prepare("PRAGMA table_info(projects)").all()).results as {name:string}[];
@@ -189,8 +193,9 @@ export function ensureNormalizedSettings(){
   if(divisions.length){
     await db.prepare("UPDATE departments SET administration_id=(SELECT a.id FROM administrations a WHERE a.hospital_id=departments.hospital_id AND a.name=departments.division LIMIT 1) WHERE administration_id IS NULL").run();
   }
-  await db.prepare("INSERT OR IGNORE INTO job_titles (name) SELECT DISTINCT job_title FROM staffing WHERE TRIM(job_title)<>''").run();
-  await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j WHERE j.name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL").run();
+  await db.prepare("INSERT OR IGNORE INTO job_titles (name,main_administration) SELECT DISTINCT s.job_title,COALESCE(a.name,d.division) FROM staffing s JOIN departments d ON d.id=s.department_id LEFT JOIN administrations a ON a.id=d.administration_id WHERE TRIM(s.job_title)<>''").run();
+  await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j JOIN departments d ON d.id=staffing.department_id LEFT JOIN administrations a ON a.id=d.administration_id JOIN hospitals h ON h.id=d.hospital_id WHERE j.name=staffing.job_title AND (j.main_administration=COALESCE(a.name,d.division) OR j.main_administration=h.name) ORDER BY CASE WHEN j.main_administration=COALESCE(a.name,d.division) THEN 0 ELSE 1 END LIMIT 1) WHERE job_title_id IS NULL").run();
+  await db.prepare("UPDATE staffing SET job_title_id=(SELECT id FROM job_titles WHERE name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL AND (SELECT COUNT(*) FROM job_titles WHERE name=staffing.job_title)=1").run();
   })().catch(error=>{ normalizedPromise=null; throw error; });
   return normalizedPromise;
 }

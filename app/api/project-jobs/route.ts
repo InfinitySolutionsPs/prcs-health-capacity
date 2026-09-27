@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/authorization";
 export async function GET() {
   if (!(await requireRole(["admin", "editor", "viewer"]))) return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
   await ensureNormalizedSettings();
-  const rows = await getRawDb().prepare("SELECT pj.id,pj.project_id AS projectId,p.name AS projectName,pj.job_title_id AS jobTitleId,j.name AS jobTitle,j.job_code AS jobCode,pj.salary,pj.coverage,pj.required_count AS requiredCount,(SELECT COUNT(*) FROM employees e WHERE e.project=p.name AND e.job_title=j.name AND e.status='على رأس عمله') AS employeesCount FROM project_jobs pj JOIN projects p ON p.id=pj.project_id JOIN job_titles j ON j.id=pj.job_title_id ORDER BY p.name,j.name").all();
+  const rows = await getRawDb().prepare("SELECT pj.id,pj.project_id AS projectId,p.name AS projectName,pj.job_title_id AS jobTitleId,j.name AS jobTitle,j.job_code AS jobCode,j.main_administration AS mainAdministration,pj.salary,pj.coverage,pj.required_count AS requiredCount,(SELECT COUNT(*) FROM employees e WHERE e.project=p.name AND e.status='على رأس عمله' AND ((j.job_code IS NOT NULL AND e.job_code=j.job_code) OR (e.job_title=j.name AND COALESCE(e.main_administration,'')=COALESCE(j.main_administration,'')))) AS employeesCount FROM project_jobs pj JOIN projects p ON p.id=pj.project_id JOIN job_titles j ON j.id=pj.job_title_id ORDER BY p.name,j.name,j.main_administration").all();
   return NextResponse.json({ items: rows.results });
 }
 
@@ -25,4 +25,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id: result.meta.last_row_id }, { status: 201 });
   } catch (error) { console.error(error); return NextResponse.json({ error: "تعذر حفظ وظيفة المشروع" }, { status: 500 }); }
 }
-

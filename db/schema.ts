@@ -75,7 +75,7 @@ export const jobTitles = sqliteTable(
       .default(sql`CURRENT_TIMESTAMP`),
   },
   (t) => [
-    uniqueIndex("idx_job_titles_name").on(t.name),
+    uniqueIndex("idx_job_titles_name_administration").on(t.name, t.mainAdministration),
     uniqueIndex("idx_job_titles_job_code").on(t.jobCode),
   ],
 );
