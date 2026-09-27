@@ -465,11 +465,12 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <Table className="min-w-[820px]">
+            <Table className="min-w-[920px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-right">اسم الموظف</TableHead>
                   <TableHead className="text-right">المركز</TableHead>
+                  <TableHead className="text-right">الإدارة</TableHead>
                   <TableHead className="text-right">المسمى</TableHead>
                   <TableHead className="text-right">نوع الكادر</TableHead>
                   <TableHead className="text-right">المشروع</TableHead>
@@ -484,6 +485,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                       <button type="button" className="text-right font-semibold text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailEmployee(e)}>{e.full_name}</button>
                     </TableCell>
                     <TableCell>{e.facility}</TableCell>
+                    <TableCell>{e.administration || e.main_administration || "—"}</TableCell>
                     <TableCell>{e.job_title}</TableCell>
                     <TableCell>{e.cadre_type}</TableCell>
                     <TableCell>{e.project ? <button type="button" className="text-right text-[#a50f27] underline-offset-4 hover:underline" onClick={() => setDetailProject(e.project)}>{e.project}</button> : "—"}</TableCell>
@@ -499,7 +501,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
                     </TableCell>
                   </TableRow>
                 ))}
-                {!visibleEmployees.length && <TableRow><TableCell colSpan={7} className="py-10 text-center text-[#7a858f]">{loadError ? "تعذر جلب البيانات؛ راجع رسالة الخطأ أعلاه." : loadingEmployees ? "جارٍ تحميل الموظفين..." : "لا توجد نتائج مطابقة"}</TableCell></TableRow>}
+                {!visibleEmployees.length && <TableRow><TableCell colSpan={8} className="py-10 text-center text-[#7a858f]">{loadError ? "تعذر جلب البيانات؛ راجع رسالة الخطأ أعلاه." : loadingEmployees ? "جارٍ تحميل الموظفين..." : "لا توجد نتائج مطابقة"}</TableCell></TableRow>}
               </TableBody>
             </Table>
           </div>
