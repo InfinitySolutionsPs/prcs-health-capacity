@@ -110,22 +110,38 @@ export function PenaltiesModule({ canEdit, isAdmin }: { canEdit: boolean; isAdmi
 
 export function PayrollModule() {
   const [entries, setEntries] = useState<any[]>([]);
+  const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState("");
+  const [periods, setPeriods] = useState<string[]>([]);
+  const [totals, setTotals] = useState({ gross: 0, deductions: 0, net: 0 });
+  const [count, setCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { setPage(1); setSearch(searchInput.trim()); }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
   const load = useCallback(async () => {
     setLoading(true);
-    try { const result = await api("/api/hr/payroll"); setEntries(result.payrollEntries || []); }
+    try {
+      const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize), q: search });
+      if (period) params.set("period", period);
+      const result = await api(`/api/hr/payroll?${params}`);
+      setEntries(result.payrollEntries || []);
+      setCount(Number(result.count || 0));
+      setTotals({ gross: Number(result.totals?.gross || 0), deductions: Number(result.totals?.deductions || 0), net: Number(result.totals?.net || 0) });
+      setPeriods(result.periods || []);
+    }
     catch (error) { toast.error(error instanceof Error ? error.message : "تعذر تحميل الرواتب"); }
     finally { setLoading(false); }
-  }, []);
+  }, [page, pageSize, period, search]);
   useEffect(() => { void load(); }, [load]);
-  const periods = useMemo(() => [...new Set(entries.map(row => String(row.period || "")))].filter(Boolean).sort((a, b) => b.localeCompare(a)), [entries]);
-  const filtered = useMemo(() => entries.filter(row => (!period || row.period === period) && [row.employeeName, row.employeeNo, row.project, row.facility, row.administration].some(value => String(value || "").toLowerCase().includes(search.toLowerCase()))), [entries, period, search]);
-  const totals = useMemo(() => filtered.reduce((acc, row) => ({ gross: acc.gross + (Number(String(row.gross || 0).replace(/[^0-9.-]/g, "")) || 0), deductions: acc.deductions + (Number(String(row.deductions || 0).replace(/[^0-9.-]/g, "")) || 0), net: acc.net + (Number(String(row.net || 0).replace(/[^0-9.-]/g, "")) || 0) }), { gross: 0, deductions: 0, net: 0 }), [filtered]);
+  const totalPages = Math.max(1, Math.ceil(count / pageSize));
   return <main dir="rtl" className="text-right">
     <Heading title="الرواتب" description="عرض بيانات الرواتب المستوردة مع التصفية حسب الفترة والموظف والمشروع." icon={<WalletCards/>}/>
     <div className="mb-5 grid gap-3 sm:grid-cols-3"><Metric label="إجمالي الرواتب" value={money(totals.gross)} color="#176b87"/><Metric label="إجمالي الخصومات" value={money(totals.deductions)} color="#a50f27"/><Metric label="صافي الرواتب" value={money(totals.net)} color="#18794e"/></div>
-    <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e7ebee] bg-[#fbfcfd] p-4"><h3 className="font-bold">سجل الرواتب ({nf.format(filtered.length)})</h3><div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"><select value={period} onChange={e => setPeriod(e.target.value)} className="h-10 rounded-md border border-[#dfe5e9] bg-white px-3 text-right shadow-sm focus:border-[#a50f27] focus:outline-none"><option value="">كل الفترات</option>{periods.map(value => <option key={value}>{value}</option>)}</select><div className="relative sm:w-64"><Search className="absolute right-3 top-3 size-4 text-[#7a858f]"/><Input value={search} onChange={e => setSearch(e.target.value)} className="pr-9" placeholder="ابحث عن موظف أو مشروع"/></div></div></div><div className="overflow-x-auto"><Table><TableHeader className="bg-[#f7f9fa]"><TableRow><TableHead>رقم الموظف</TableHead><TableHead>اسم الموظف</TableHead><TableHead>الفترة</TableHead><TableHead>المشروع</TableHead><TableHead>مركز العمل</TableHead><TableHead>الإدارة</TableHead><TableHead>الإجمالي</TableHead><TableHead>الخصومات</TableHead><TableHead>الصافي</TableHead></TableRow></TableHeader><TableBody>{filtered.map(row => <TableRow key={row.id}><TableCell>{row.employeeNo}</TableCell><TableCell className="font-semibold">{row.employeeName}</TableCell><TableCell>{row.period}</TableCell><TableCell>{row.project}</TableCell><TableCell>{row.facility || "—"}</TableCell><TableCell>{row.administration || "—"}</TableCell><TableCell>{money(row.gross)}</TableCell><TableCell>{money(row.deductions)}</TableCell><TableCell className="font-bold text-[#18794e]">{money(row.net)}</TableCell></TableRow>)}{!filtered.length && <TableRow><TableCell colSpan={9} className="py-10 text-center text-[#7a858f]">{loading ? "جارٍ تحميل الرواتب..." : "لا توجد سجلات رواتب. استورد ملف الرواتب من شاشة الموظفين."}</TableCell></TableRow>}</TableBody></Table></div></section>
+    <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e7ebee] bg-[#fbfcfd] p-4"><h3 className="font-bold">سجل الرواتب ({nf.format(count)})</h3><div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"><select value={period} onChange={e => { setPeriod(e.target.value); setPage(1); }} className="h-10 rounded-md border border-[#dfe5e9] bg-white px-3 text-right shadow-sm focus:border-[#a50f27] focus:outline-none"><option value="">كل الفترات</option>{periods.map(value => <option key={value}>{value}</option>)}</select><div className="relative sm:w-64"><Search className="absolute right-3 top-3 size-4 text-[#7a858f]"/><Input value={searchInput} onChange={e => setSearchInput(e.target.value)} className="pr-9" placeholder="ابحث عن موظف أو مشروع"/></div></div></div><div className="overflow-x-auto"><Table><TableHeader className="bg-[#f7f9fa]"><TableRow><TableHead>رقم الموظف</TableHead><TableHead>اسم الموظف</TableHead><TableHead>الفترة</TableHead><TableHead>المشروع</TableHead><TableHead>مركز العمل</TableHead><TableHead>الإدارة</TableHead><TableHead>الإجمالي</TableHead><TableHead>الخصومات</TableHead><TableHead>الصافي</TableHead></TableRow></TableHeader><TableBody>{entries.map(row => <TableRow key={row.id}><TableCell>{row.employeeNo}</TableCell><TableCell className="font-semibold">{row.employeeName}</TableCell><TableCell>{row.period}</TableCell><TableCell>{row.project}</TableCell><TableCell>{row.facility || "—"}</TableCell><TableCell>{row.administration || "—"}</TableCell><TableCell>{money(row.gross)}</TableCell><TableCell>{money(row.deductions)}</TableCell><TableCell className="font-bold text-[#18794e]">{money(row.net)}</TableCell></TableRow>)}{!entries.length && <TableRow><TableCell colSpan={9} className="py-10 text-center text-[#7a858f]">{loading ? "جارٍ تحميل الرواتب..." : "لا توجد سجلات رواتب. استورد ملف الرواتب من شاشة الموظفين."}</TableCell></TableRow>}</TableBody></Table></div><div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#fafbfc] p-3 text-sm"><div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {nf.format(count)}</span></div><div className="flex items-center gap-2"><Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>السابق</Button><span>صفحة {page} من {totalPages}</span><Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(value => value + 1)}>التالي</Button></div></div></section>
   </main>;
 }
