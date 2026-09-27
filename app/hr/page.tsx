@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import {
   ArrowRight,
@@ -36,6 +36,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { SearchableFilterInput } from "@/components/searchable-filter";
 type D = {
   employees: any[];
+  employeeCount?: number;
+  filteredCount?: number;
+  filterOptions?: Record<string, string[]>;
   summary: any;
   facilities: any[];
   statuses: any[];
@@ -157,11 +160,17 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     [page, setPage] = useState(1), [pageSize, setPageSize] = useState(25),
     [busy, setBusy] = useState(false),
     [detailEmployee, setDetailEmployee] = useState<any | null>(null),
-    [detailProject, setDetailProject] = useState<string | null>(null);
+    [detailProject, setDetailProject] = useState<string | null>(null),
+    [projectEmployees, setProjectEmployees] = useState<any[]>([]);
+  const employeeQuery = useCallback((all = false) => {
+    const params = new URLSearchParams({ q, ...(all ? { limit: "10000" } : { page: String(page), pageSize: String(pageSize) }) });
+    for (const [key, value] of Object.entries(filters)) if (value) params.set(key, value);
+    return params.toString();
+  }, [q, page, pageSize, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType, filters.project]);
   const load = useCallback(async () => {
-    const r = await fetch(`/api/hr?q=${encodeURIComponent(q)}&limit=10000`);
+    const r = await fetch(`/api/hr?${employeeQuery()}`);
     if (r.ok) setData(await r.json());
-  }, [q]);
+  }, [employeeQuery]);
   useEffect(() => { setPage(1); }, [q, filters.jobTitle, filters.facility, filters.administration, filters.department, filters.status, filters.cadreType, filters.project]);
   useEffect(() => {
     const timer = window.setTimeout(() => setQ(searchInput.trim()), 350);
@@ -171,6 +180,11 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
     load();
     fetch("/api/data").then((r) => r.ok ? r.json() : null).then((v) => v && setStructure(v)).catch(() => undefined);
   }, [load]);
+  useEffect(() => {
+    if (!detailProject) { setProjectEmployees([]); return; }
+    const params = new URLSearchParams({ project: detailProject, limit: "10000" });
+    fetch(`/api/hr?${params}`).then((r) => r.ok ? r.json() : null).then((v) => setProjectEmployees(v?.employees || [])).catch(() => setProjectEmployees([]));
+  }, [detailProject]);
   async function upload(file: File, type: "employees" | "payroll") {
     try {
       setBusy(true);
@@ -333,27 +347,14 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
       setBusy(false);
     }
   }
-  const filteredEmployees = useMemo(() => (data?.employees || []).filter((e: any) => {
-    const employeeField: Record<string, string> = {
-      jobTitle: "job_title",
-      cadreType: "cadre_type",
-      facility: "facility",
-      administration: "administration",
-      department: "department",
-      status: "status",
-    };
-    const match = (key: string) => {
-      const selected = filters[key as keyof typeof filters];
-      return !selected || String(e[employeeField[key] || key] || "") === selected;
-    };
-    return match("jobTitle") && match("facility") && match("administration") && match("department") && match("status") && match("cadreType") && match("project");
-  }), [data?.employees, filters]);
-  const totalPages = Math.max(1, Math.ceil(filteredEmployees.length / pageSize));
-  const visibleEmployees = filteredEmployees.slice((page - 1) * pageSize, page * pageSize);
-  const cadreOptions = (data?.cadres || []).map((r: any) => String(r.name)).filter(Boolean);
+  const filteredEmployees = data?.employees || [];
+  const filteredCount = Number(data?.filteredCount || 0);
+  const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
+  const visibleEmployees = filteredEmployees;
+  const cadreOptions = (data?.filterOptions?.cadreType || (data?.cadres || []).map((r: any) => r.name)).map(String).filter(Boolean);
   const projectOptions = Array.from(new Set([
     ...(structure.projects || []).map((p: any) => String(p.name || p.project || "")),
-    ...(data?.employees || []).map((e: any) => String(e.project || "")),
+    ...(data?.filterOptions?.project || []).map(String),
   ].filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
   const exportFields = [
     ["employee_no", "رقم الموظف"], ["employee_code", "كود الموظف"], ["full_name", "اسم الموظف"],
@@ -363,10 +364,13 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   ] as const;
   const [exportOpen, setExportOpen] = useState(false);
   const [selectedExportFields, setSelectedExportFields] = useState<string[]>(["employee_no", "full_name", "facility", "administration", "department", "job_title", "cadre_type", "status"]);
-  function exportEmployees(){
+  async function exportEmployees(){
+    const response = await fetch(`/api/hr?${employeeQuery(true)}`);
+    if (!response.ok) { toast.error("تعذر تحميل نتائج التصدير"); return; }
+    const exportData = await response.json();
     const administrationOrder = ["إدارة المركز", "الإدارة الطبية", "الإدارة التمريضية", "الإدارة الفنية", "الإدارة الفنية المساعدة"];
     const rank = (e:any) => { const a=String(e.administration||e.main_administration||""); const i=administrationOrder.findIndex(x=>a.includes(x)); return i<0?administrationOrder.length:i; };
-    const sorted=[...filteredEmployees].sort((a,b)=>{
+    const sorted=[...(exportData.employees || [])].sort((a,b)=>{
       const byAdmin=rank(a)-rank(b); if(byAdmin)return byAdmin;
       const aa=String(a.administration||a.main_administration||""), bb=String(b.administration||b.main_administration||"");
       const aEmergency=aa.includes("الطبية")&&/طوارئ|استقبال/.test(String(a.job_title||""));
@@ -422,7 +426,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
           <h2 className="mb-3 flex items-center gap-2 font-bold text-[#a50f27]"><Search className="size-5" /> فلاتر بحث الموظفين <span className="text-xs font-normal text-[#7a858f]">اكتب للبحث داخل أي فلتر</span></h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {([ ["jobTitle", "المسمى الوظيفي"], ["facility", "مركز العمل"], ["administration", "الدائرة"], ["department", "القسم"], ["status", "حالة الموظف"], ["cadreType", "نوع الكادر"], ["project", "المشروع"] ] as const).map(([key, label]) => {
-              const values = key === "cadreType" ? cadreOptions : key === "project" ? projectOptions : Array.from(new Set((data?.employees || []).map((e: any) => e[key === "jobTitle" ? "job_title" : key]).filter(Boolean))).sort();
+              const values = key === "cadreType" ? cadreOptions : key === "project" ? projectOptions : key === "status" ? (data?.statuses || []).map((r: any) => String(r.name)) : (data?.filterOptions?.[key] || []).map(String);
               return <SearchableFilterInput key={key} value={filters[key]} onChange={(value) => setFilters((f) => ({ ...f, [key]: value }))} placeholder={label} allLabel={`كل ${label}`} options={values.map(String)} />;
             })}
             <Button type="button" variant="outline" onClick={() => { setSearchInput(""); setQ(""); setFilters({ jobTitle: "", facility: "", administration: "", department: "", status: "على رأس عمله", cadreType: "", project: "" }); }}>مسح الفلاتر</Button>
@@ -435,7 +439,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
         </section>
         <section className="overflow-hidden rounded-2xl border bg-white">
           <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-bold">سجل الموظفين <span className="text-sm font-normal text-[#6b7681]">({n.format(filteredEmployees.length)})</span></h2>
+            <h2 className="font-bold">سجل الموظفين <span className="text-sm font-normal text-[#6b7681]">({n.format(filteredCount)})</span></h2>
             <div className="relative w-full sm:w-80">
               <Search className="absolute right-3 top-3 size-4 text-gray-400" />
               <Input
@@ -486,13 +490,13 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             </Table>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#fafbfc] p-3 text-sm">
-            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {n.format(filteredEmployees.length)}</span></div>
+            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {n.format(filteredCount)}</span></div>
             <div className="flex items-center gap-2"><Button type="button" variant="outline" size="sm" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><span>صفحة {page} من {totalPages}</span><Button type="button" variant="outline" size="sm" disabled={page>=totalPages} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
           </div>
         </section>
       </div>
       <EmployeeDetailsDialog employee={detailEmployee} onClose={() => setDetailEmployee(null)} jobCodes={data?.jobCodes || []} structure={structure} cadreOptions={cadreOptions} onSaved={load} />
-      <ProjectDetailsDialog projectName={detailProject} onClose={() => setDetailProject(null)} projects={structure.projects || []} projectJobs={structure.projectJobs || []} employees={data?.employees || []} />
+      <ProjectDetailsDialog projectName={detailProject} onClose={() => setDetailProject(null)} projects={structure.projects || []} projectJobs={structure.projectJobs || []} employees={projectEmployees} />
       <Dialog open={exportOpen} onOpenChange={setExportOpen}><DialogContent dir="rtl" className="text-right sm:max-w-lg"><DialogHeader className="text-right"><DialogTitle>اختيار أعمدة التصدير</DialogTitle><DialogDescription>سيتم تصدير نتائج البحث الحالية مرتبة حسب الإدارة.</DialogDescription></DialogHeader><div className="grid grid-cols-2 gap-2">{exportFields.map(([key,label])=><label key={key} className="flex items-center gap-2 rounded-lg bg-[#f7f9fa] p-2"><input type="checkbox" checked={selectedExportFields.includes(key)} onChange={e=>setSelectedExportFields(v=>e.target.checked?[...v,key]:v.filter(x=>x!==key))}/><span>{label}</span></label>)}</div><DialogFooter><Button type="button" disabled={!selectedExportFields.length} onClick={exportEmployees} className="w-full gap-2 bg-[#18794e] hover:bg-[#12623e]"><FileSpreadsheet className="size-4"/>تنزيل الملف</Button></DialogFooter></DialogContent></Dialog>
       <Toaster richColors />
     </main>
@@ -1124,4 +1128,3 @@ function ReadOnly({ label, value }: { label: string; value: string }) {
     </label>
   );
 }
-

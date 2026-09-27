@@ -7,20 +7,33 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 403 });
   const u = new URL(req.url),
     q = (u.searchParams.get("q") || "").trim(),
-    limit = Math.min(Number(u.searchParams.get("limit") || 100), 10000);
+    limit = Math.min(Number(u.searchParams.get("limit") || 100), 10000),
+    paged = u.searchParams.has("page"),
+    page = Math.max(1, Number(u.searchParams.get("page") || 1)),
+    pageSize = Math.min(100, Math.max(1, Number(u.searchParams.get("pageSize") || 25))),
+    filters = ["jobTitle", "facility", "administration", "department", "status", "cadreType", "project"] as const;
   const db = getRawDb();
   await ensureNormalizedSettings();
-  const seededCount = await db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>();
-  const where = q
-    ? "WHERE full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?"
-    : "";
-  const args = q ? [`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`] : [];
-  const [employees, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles, cadreTypes] =
+  const filterColumns = { jobTitle: "job_title", facility: "facility", administration: "administration", department: "department", status: "status", cadreType: "cadre_type", project: "project" } as const;
+  const clauses: string[] = [];
+  const args: string[] = [];
+  if (q) {
+    clauses.push("(full_name LIKE ? OR employee_no LIKE ? OR facility LIKE ? OR department LIKE ? OR job_title LIKE ?)");
+    args.push(...Array(5).fill(`%${q}%`));
+  }
+  for (const key of filters) {
+    const value = u.searchParams.get(key);
+    if (value) { clauses.push(`${filterColumns[key]} = ?`); args.push(value); }
+  }
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  const [employees, filteredCount, seededCount, summary, facilities, statuses, cadres, payroll, jobCodes, hospitals, administrations, departments, jobTitles, cadreTypes, filterOptions] =
     await Promise.all([
       db
-        .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ?`)
-        .bind(...args, limit)
+        .prepare(`SELECT * FROM employees ${where} ORDER BY full_name LIMIT ? OFFSET ?`)
+        .bind(...args, paged ? pageSize : limit, paged ? (page - 1) * pageSize : 0)
         .all(),
+      db.prepare(`SELECT COUNT(*) AS count FROM employees ${where}`).bind(...args).first<{count:number}>(),
+      db.prepare("SELECT COUNT(*) AS count FROM employees").first<{count:number}>(),
       db
         .prepare(
           "SELECT COUNT(*) total, SUM(CASE WHEN status='على رأس عمله' THEN 1 ELSE 0 END) active, COUNT(DISTINCT facility) facilities, COUNT(DISTINCT job_title) jobs FROM employees",
@@ -56,10 +69,17 @@ export async function GET(req: Request) {
       db.prepare("SELECT d.id,d.hospital_id AS hospitalId,d.administration_id AS administrationId,COALESCE(a.name,d.division) AS administration,d.name,h.name AS hospitalName FROM departments d JOIN hospitals h ON h.id=d.hospital_id LEFT JOIN administrations a ON a.id=d.administration_id ORDER BY h.name,administration,d.name").all(),
       db.prepare("SELECT id,name,active,main_administration AS mainAdministration,category_code AS categoryCode,job_code AS jobCode FROM job_titles WHERE active=1 ORDER BY name").all(),
       db.prepare("SELECT id,name FROM cadre_types ORDER BY name").all(),
+      db.prepare("SELECT 'jobTitle' AS kind,job_title AS value FROM employees WHERE job_title IS NOT NULL AND job_title<>'' UNION SELECT 'facility',facility FROM employees WHERE facility IS NOT NULL AND facility<>'' UNION SELECT 'administration',administration FROM employees WHERE administration IS NOT NULL AND administration<>'' UNION SELECT 'department',department FROM employees WHERE department IS NOT NULL AND department<>'' UNION SELECT 'project',project FROM employees WHERE project IS NOT NULL AND project<>'' UNION SELECT 'cadreType',cadre_type FROM employees WHERE cadre_type IS NOT NULL AND cadre_type<>'' ORDER BY kind,value").all(),
     ]);
+  const optionRows = filterOptions.results as {kind:string;value:string}[];
+  const options = Object.fromEntries(["jobTitle", "facility", "administration", "department", "project", "cadreType"].map(kind => [kind, optionRows.filter(row => row.kind === kind).map(row => row.value)]));
   return NextResponse.json({
     employees: employees.results,
     employeeCount: Number(seededCount?.count || 0),
+    filteredCount: Number(filteredCount?.count || 0),
+    page: paged ? page : 1,
+    pageSize: paged ? pageSize : limit,
+    filterOptions: options,
     summary,
     facilities: facilities.results,
     statuses: statuses.results,
@@ -253,4 +273,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
