@@ -46,7 +46,7 @@ async function request(path:string, options?:RequestInit){
 export default function Home(){
   const [data,setData]=useState<Data>(empty); const [view,setView]=useState<View>("dashboard");
   const [loading,setLoading]=useState(true); const [authLoading,setAuthLoading]=useState(true);const [authUser,setAuthUser]=useState<AuthUser|null>(null); const [hospitalFilter,setHospitalFilter]=useState("all"); const [administrationFilter,setAdministrationFilter]=useState("all"); const [departmentFilter,setDepartmentFilter]=useState("all"); const [jobTitleFilter,setJobTitleFilter]=useState("all");const [deficitOnly,setDeficitOnly]=useState(false);
-  const load=useCallback(async()=>{try{setLoading(true);setData(await request("/api/data"))}catch(e){toast.error(e instanceof Error?e.message:"تعذر تحميل البيانات")}finally{setLoading(false)}},[]);
+  const load=useCallback(async()=>{try{setLoading(true);const payload=await request("/api/data");if(!payload||!["hospitals","administrations","departments","jobTitles","cadreTypes","projects","projectJobs","staffing"].every(key=>Array.isArray(payload[key])))throw new Error("استجابة البيانات غير مكتملة. حدّث الصفحة بعد قليل.");setData(payload as Data)}catch(e){toast.error(e instanceof Error?e.message:"تعذر تحميل البيانات")}finally{setLoading(false)}},[]);
   useEffect(()=>{(async()=>{try{const a=await request("/api/auth/me");setAuthUser(a.user);await load()}catch{setAuthUser(null)}finally{setAuthLoading(false)}})()},[load]);
   useEffect(()=>{setAdministrationFilter("all");setDepartmentFilter("all")},[hospitalFilter]);
   useEffect(()=>{setDepartmentFilter("all")},[administrationFilter]);

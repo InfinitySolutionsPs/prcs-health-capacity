@@ -170,12 +170,18 @@ let normalizedPromise: Promise<void> | null = null;
 export function ensureNormalizedSettings(){
   if(normalizedPromise) return normalizedPromise;
   normalizedPromise=(async()=>{
+  const db=getRawDb();
+  let normalized:{value:string}|null=null;
+  try{normalized=await db.prepare("SELECT value FROM system_metadata WHERE key=?").bind("normalized_settings_v2").first<{value:string}>()}catch{/* A new database has no metadata table yet. */}
+  // Worker isolates may be restarted between requests. Persist the completion
+  // marker in D1 so expensive seed and normalization writes do not run again
+  // every time a new isolate serves /api/data.
+  if(normalized?.value==="1")return;
   await ensureCoreSchema();
   await ensureEmployeeFields();
   await ensureBaseData();
   await ensureEmployeeSeed();
   await ensureProjectAssignments();
-  const db=getRawDb();
   // A fixed title may be shared by multiple administrations, but not repeated
   // within the same administration. Replace the legacy global-name constraint.
   await db.prepare("DROP INDEX IF EXISTS idx_job_titles_name").run();
@@ -204,6 +210,7 @@ export function ensureNormalizedSettings(){
   // administration where it is already used.
   await db.prepare("INSERT OR IGNORE INTO job_title_administrations (job_title_id,administration_id) SELECT j.id,a.id FROM job_titles j JOIN administrations a ON a.name=j.main_administration").run();
   await db.prepare("INSERT OR IGNORE INTO job_title_administrations (job_title_id,administration_id) SELECT s.job_title_id,d.administration_id FROM staffing s JOIN departments d ON d.id=s.department_id WHERE s.job_title_id IS NOT NULL AND d.administration_id IS NOT NULL").run();
+  await db.prepare("INSERT OR REPLACE INTO system_metadata (key,value) VALUES (?,?)").bind("normalized_settings_v2","1").run();
   })().catch(error=>{ normalizedPromise=null; throw error; });
   return normalizedPromise;
 }
