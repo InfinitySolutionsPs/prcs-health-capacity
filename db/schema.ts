@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  index,
   integer,
   sqliteTable,
   text,
@@ -77,6 +78,19 @@ export const jobTitles = sqliteTable(
   (t) => [
     uniqueIndex("idx_job_titles_name_administration").on(t.name, t.mainAdministration),
     uniqueIndex("idx_job_titles_job_code").on(t.jobCode),
+  ],
+);
+
+export const jobTitleAdministrations = sqliteTable(
+  "job_title_administrations",
+  {
+    jobTitleId: integer("job_title_id").notNull().references(() => jobTitles.id, { onDelete: "cascade" }),
+    administrationId: integer("administration_id").notNull().references(() => administrations.id, { onDelete: "cascade" }),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => [
+    uniqueIndex("idx_job_title_administrations_pair").on(t.jobTitleId, t.administrationId),
+    index("idx_job_title_administrations_administration").on(t.administrationId),
   ],
 );
 

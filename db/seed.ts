@@ -24,6 +24,9 @@ async function ensureCoreSchema(){
     db.prepare("CREATE TABLE IF NOT EXISTS job_titles (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, department_id INTEGER, main_administration TEXT, category_code TEXT, job_code TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_name_administration ON job_titles(name,main_administration)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_titles_job_code ON job_titles(job_code)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS job_title_administrations (job_title_id INTEGER NOT NULL REFERENCES job_titles(id) ON DELETE CASCADE, administration_id INTEGER NOT NULL REFERENCES administrations(id) ON DELETE CASCADE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
+    db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_job_title_administrations_pair ON job_title_administrations(job_title_id,administration_id)"),
+    db.prepare("CREATE INDEX IF NOT EXISTS idx_job_title_administrations_administration ON job_title_administrations(administration_id)"),
     db.prepare("CREATE TABLE IF NOT EXISTS staffing (id INTEGER PRIMARY KEY AUTOINCREMENT, department_id INTEGER NOT NULL, job_title_id INTEGER, job_title TEXT NOT NULL, required INTEGER NOT NULL DEFAULT 0, available INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_staffing_department_job ON staffing(department_id,job_title)"),
     db.prepare("CREATE TABLE IF NOT EXISTS system_metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL)"),
@@ -197,6 +200,10 @@ export function ensureNormalizedSettings(){
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j JOIN departments d ON d.id=staffing.department_id LEFT JOIN administrations a ON a.id=d.administration_id JOIN hospitals h ON h.id=d.hospital_id WHERE j.name=staffing.job_title AND (j.main_administration=COALESCE(a.name,d.division) OR j.main_administration=h.name) ORDER BY CASE WHEN j.main_administration=COALESCE(a.name,d.division) THEN 0 ELSE 1 END LIMIT 1) WHERE (SELECT COUNT(*) FROM job_titles WHERE name=staffing.job_title)>1 AND EXISTS (SELECT 1 FROM job_titles j JOIN departments d ON d.id=staffing.department_id LEFT JOIN administrations a ON a.id=d.administration_id JOIN hospitals h ON h.id=d.hospital_id WHERE j.name=staffing.job_title AND (j.main_administration=COALESCE(a.name,d.division) OR j.main_administration=h.name))").run();
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT j.id FROM job_titles j JOIN departments d ON d.id=staffing.department_id LEFT JOIN administrations a ON a.id=d.administration_id JOIN hospitals h ON h.id=d.hospital_id WHERE j.name=staffing.job_title AND (j.main_administration=COALESCE(a.name,d.division) OR j.main_administration=h.name) ORDER BY CASE WHEN j.main_administration=COALESCE(a.name,d.division) THEN 0 ELSE 1 END LIMIT 1) WHERE job_title_id IS NULL").run();
   await db.prepare("UPDATE staffing SET job_title_id=(SELECT id FROM job_titles WHERE name=staffing.job_title LIMIT 1) WHERE job_title_id IS NULL AND (SELECT COUNT(*) FROM job_titles WHERE name=staffing.job_title)=1").run();
+  // Keep legacy titles usable and associate each staffing title with the
+  // administration where it is already used.
+  await db.prepare("INSERT OR IGNORE INTO job_title_administrations (job_title_id,administration_id) SELECT j.id,a.id FROM job_titles j JOIN administrations a ON a.name=j.main_administration").run();
+  await db.prepare("INSERT OR IGNORE INTO job_title_administrations (job_title_id,administration_id) SELECT s.job_title_id,d.administration_id FROM staffing s JOIN departments d ON d.id=s.department_id WHERE s.job_title_id IS NOT NULL AND d.administration_id IS NOT NULL").run();
   })().catch(error=>{ normalizedPromise=null; throw error; });
   return normalizedPromise;
 }
