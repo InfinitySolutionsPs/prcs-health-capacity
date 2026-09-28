@@ -29,6 +29,17 @@ export async function PATCH(
 
   const db = getRawDb();
   await ensureNormalizedSettings();
+  if (r.cadreType) {
+    const cadreType = await db
+      .prepare("SELECT id FROM cadre_types WHERE name=? LIMIT 1")
+      .bind(String(r.cadreType).trim())
+      .first();
+    if (!cadreType)
+      return NextResponse.json(
+        { error: "نوع الكادر غير موجود في قائمة الإعدادات المركزية" },
+        { status: 400 },
+      );
+  }
   const current = await db
     .prepare("SELECT id,job_code,employee_code FROM employees WHERE id=?")
     .bind(id)

@@ -162,6 +162,17 @@ async function postHR(req: Request) {
         { error: "الاسم الرباعي والمسمى الوظيفي مطلوبة" },
         { status: 400 },
       );
+    if (r.cadreType) {
+      const cadreType = await db
+        .prepare("SELECT id FROM cadre_types WHERE name=? LIMIT 1")
+        .bind(String(r.cadreType).trim())
+        .first();
+      if (!cadreType)
+        return NextResponse.json(
+          { error: "نوع الكادر غير موجود في قائمة الإعدادات المركزية" },
+          { status: 400 },
+        );
+    }
     const fullName = nameParts.join(" ");
     const last = await db
       .prepare(

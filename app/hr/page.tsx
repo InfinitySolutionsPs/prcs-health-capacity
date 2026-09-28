@@ -45,6 +45,7 @@ type D = {
   cadres: any[];
   payroll: any;
   jobCodes: any[];
+  settings?: { cadreTypes?: any[] };
 };
 export type Structure = { hospitals: any[]; administrations: any[]; departments: any[]; jobTitles?: any[]; cadreTypes?: any[]; projects?: any[]; projectJobs?: any[]; staffing?: any[] };
 const LOCATION_OPTIONS: Record<string,string[]> = {
@@ -363,7 +364,11 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
   const filteredCount = Number(data?.filteredCount || 0);
   const totalPages = Math.max(1, Math.ceil(filteredCount / pageSize));
   const visibleEmployees = filteredEmployees;
-  const cadreOptions = (data?.filterOptions?.cadreType || (data?.cadres || []).map((r: any) => r.name)).map(String).filter(Boolean);
+  // Cadre types are centrally managed in Settings. Employee records must not
+  // introduce extra values into either the form or its filters.
+  const cadreOptions = (data?.settings?.cadreTypes || structure.cadreTypes || [])
+    .map((item: any) => String(item.name || item))
+    .filter(Boolean);
   const projectOptions = Array.from(new Set([
     ...(structure.projects || []).map((p: any) => String(p.name || p.project || "")),
     ...(data?.filterOptions?.project || []).map(String),
@@ -731,6 +736,9 @@ export function EmployeeDialog({
   async function save(e: React.FormEvent) {
     e.preventDefault();
     try {
+      if (form.cadreType && !cadreOptions.includes(form.cadreType)) {
+        throw new Error("نوع الكادر الحالي غير موجود في الإعدادات، اختر نوعاً من القائمة المركزية");
+      }
       setSaving(true);
       const res = await fetch(editing ? `/api/hr/${employee.id}` : "/api/hr", {
         method: editing ? "PATCH" : "POST",
@@ -895,7 +903,7 @@ export function EmployeeDialog({
             <FixedSelect label="مركز العمل" value={form.facility} onChange={(v) => { set("facility", v); set("administration", ""); set("department", ""); }} options={structure.hospitals.map((h) => h.name)} />
             <FixedSelect label="الدائرة" value={form.administration} onChange={(v) => { set("administration", v); set("department", ""); }} options={administrations.map((a) => a.name)} />
             <FixedSelect label="القسم" value={form.department} onChange={(v) => { set("department", v); set("jobCode", ""); set("jobTitle", ""); }} options={departments.map((d) => d.name)} />
-            <FixedSelect label="نوع الكادر" value={form.cadreType} onChange={(v) => set("cadreType", v)} options={[...cadreOptions, form.cadreType].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
+            <FixedSelect label="نوع الكادر" value={cadreOptions.includes(form.cadreType) ? form.cadreType : ""} onChange={(v) => set("cadreType", v)} options={cadreOptions} />
             <Field
               label="تاريخ التعيين"
               type="date"
