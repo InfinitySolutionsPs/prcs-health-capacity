@@ -512,7 +512,7 @@ export function HRView({ embedded = false }: { embedded?: boolean }) {
             </Table>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#fafbfc] p-3 text-sm">
-            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><select value={pageSize} onChange={e=>{setPageSize(Number(e.target.value));setPage(1)}} className="rounded-md border bg-white px-2 py-1"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><span>من {data ? n.format(filteredCount) : "—"}</span></div>
+            <div className="flex items-center gap-2"><span>عدد الصفوف:</span><SearchableSelect value={String(pageSize)} onChange={v=>{setPageSize(Number(v));setPage(1)}} placeholder="عدد الصفوف" searchPlaceholder="ابحث عن عدد الصفوف" className="h-9 w-24" contentClassName="min-w-48" options={[25,50,100].map(v=>({value:String(v),label:String(v)}))}/><span>من {data ? n.format(filteredCount) : "—"}</span></div>
             <div className="flex items-center gap-2"><Button type="button" variant="outline" size="sm" disabled={page<=1} onClick={()=>setPage(p=>p-1)}>السابق</Button><span>صفحة {page} من {totalPages}</span><Button type="button" variant="outline" size="sm" disabled={page>=totalPages} onClick={()=>setPage(p=>p+1)}>التالي</Button></div>
           </div>
         </section>

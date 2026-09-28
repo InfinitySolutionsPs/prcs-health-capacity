@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmployeeDialog, type Structure } from "@/app/hr/page";
 import { SearchableFilterInput } from "@/components/searchable-filter";
+import { SearchableSelect } from "@/components/searchable-select";
 
 type Staffing = {
   id: number;
@@ -178,7 +179,7 @@ export function IntegratedCapacity() {
           })}</tbody>
         </table>
       </div>
-      {!loading && filteredStaffing.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#f7f9fa] px-4 py-3 text-xs"><label className="flex items-center gap-2">عدد السجلات في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-xl border border-[#dfe5e9] bg-white px-3"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pageCount} — {nf.format(filteredStaffing.length)} سجل</span><Button variant="outline" size="sm" disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>}
+      {!loading && filteredStaffing.length > 0 && <div className="flex flex-wrap items-center justify-between gap-3 border-t bg-[#f7f9fa] px-4 py-3 text-xs"><label className="flex items-center gap-2">عدد السجلات في الصفحة<SearchableSelect value={String(pageSize)} onChange={(value) => setPageSize(Number(value))} placeholder="عدد الصفوف" searchPlaceholder="ابحث عن عدد الصفوف" className="h-9 w-24" contentClassName="min-w-48" options={[10,25,50,100].map(value=>({value:String(value),label:String(value)}))}/></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pageCount} — {nf.format(filteredStaffing.length)} سجل</span><Button variant="outline" size="sm" disabled={page >= pageCount} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>}
     </section>
   </div>;
 }
@@ -202,7 +203,7 @@ function EmployeeNamesCell({ employees, jobCodes, structure, cadreOptions, onSav
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full border-collapse text-xs"><thead className="bg-[#f7f9fa]"><tr><th className="whitespace-nowrap border-b px-3 py-2 text-right">#</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">اسم الموظف</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">المسمى الوظيفي</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">مركز العمل</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">القسم</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="whitespace-nowrap border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="whitespace-nowrap border-b px-3 py-2">{employee.job_title || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.facility || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.department || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="h-9 rounded-md border bg-white px-2"><option value="5">5</option><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<SearchableSelect value={String(pageSize)} onChange={(value) => setPageSize(Number(value))} placeholder="عدد الموظفين" searchPlaceholder="ابحث عن العدد" className="h-9 w-24" contentClassName="min-w-48" options={[5,10,25,50].map(value=>({value:String(value),label:String(value)}))}/></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
       </DialogContent>
     </Dialog>
     <EmployeeDialog employee={detail} open={Boolean(detail)} onOpenChange={(value) => !value && setDetail(null)} hideTrigger jobCodes={jobCodes} structure={structure} cadreOptions={cadreOptions} onSaved={onSaved} />
@@ -241,4 +242,3 @@ function Summary({ title, value, tone = "blue" }: { title: string; value: number
   const color = tone === "green" ? "border-r-emerald-600" : tone === "red" ? "border-r-[#b5122b]" : "border-r-[#197b9a]";
   return <div className={`rounded-2xl border border-[#dfe5e9] border-r-4 ${color} bg-white p-4 shadow-sm`}><p className="text-sm text-[#6b7681]">{title}</p><p className="mt-2 text-3xl font-extrabold" dir="ltr">{nf.format(value)}</p></div>;
 }
-

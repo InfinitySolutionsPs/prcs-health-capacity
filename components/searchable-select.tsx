@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -16,6 +16,7 @@ export function SearchableSelect({
   searchPlaceholder = "ابحث في القائمة...",
   disabled = false,
   className = "",
+  contentClassName = "",
   allowClear = false,
   clearLabel = "بدون تحديد",
 }: {
@@ -26,14 +27,23 @@ export function SearchableSelect({
   searchPlaceholder?: string;
   disabled?: boolean;
   className?: string;
+  contentClassName?: string;
   allowClear?: boolean;
   clearLabel?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const selected = options.find((option) => option.value === value);
+  const visibleOptions = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+    const matches = normalizedQuery
+      ? options.filter((option) => `${option.label} ${option.value}`.toLocaleLowerCase().includes(normalizedQuery))
+      : options;
+    return matches.slice(0, 100);
+  }, [options, query]);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={(next) => { setOpen(next); if (!next) setQuery(""); }}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -49,9 +59,9 @@ export function SearchableSelect({
           <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" dir="rtl" className="w-[var(--radix-popover-trigger-width)] p-0">
-        <Command dir="rtl">
-          <CommandInput placeholder={searchPlaceholder} className="text-right" />
+      <PopoverContent align="start" dir="rtl" className={`w-[var(--radix-popover-trigger-width)] p-0 ${contentClassName}`}>
+        <Command dir="rtl" shouldFilter={false}>
+          <CommandInput value={query} onValueChange={setQuery} placeholder={searchPlaceholder} className="text-right" />
           <CommandList>
             <CommandEmpty>لا توجد نتيجة مطابقة.</CommandEmpty>
             <CommandGroup>
@@ -61,6 +71,7 @@ export function SearchableSelect({
                   onSelect={() => {
                     onChange("");
                     setOpen(false);
+                    setQuery("");
                   }}
                   className="justify-between text-right text-muted-foreground"
                 >
@@ -68,13 +79,14 @@ export function SearchableSelect({
                   <Check className={`size-4 ${!value ? "opacity-100" : "opacity-0"}`} />
                 </CommandItem>
               )}
-              {options.map((option) => (
+              {visibleOptions.map((option) => (
                 <CommandItem
                   key={option.value}
                   value={`${option.label} ${option.value}`}
                   onSelect={() => {
                     onChange(option.value);
                     setOpen(false);
+                    setQuery("");
                   }}
                   className="justify-between text-right"
                 >
@@ -84,6 +96,7 @@ export function SearchableSelect({
               ))}
             </CommandGroup>
           </CommandList>
+          {visibleOptions.length === 100 && <p className="border-t px-3 py-2 text-center text-xs text-muted-foreground">تظهر أول 100 نتيجة؛ اكتب للبحث عن نتيجة محددة.</p>}
         </Command>
       </PopoverContent>
     </Popover>
