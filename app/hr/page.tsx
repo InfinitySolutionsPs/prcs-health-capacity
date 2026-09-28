@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { SearchableFilterInput } from "@/components/searchable-filter";
+import { SearchableSelect } from "@/components/searchable-select";
 type D = {
   employees: any[];
   employeeCount?: number;
@@ -883,18 +884,14 @@ export function EmployeeDialog({
               <span className="block text-sm font-medium">
                 المسمى الوظيفي *
               </span>
-              <select
+              <SearchableSelect
                 value={form.jobCode}
-                onChange={(e) => changeJob(e.target.value)}
-                className="h-10 w-full rounded-md border bg-white px-3 text-right"
-              >
-                <option value="">اختر المسمى الوظيفي</option>
-                {jobOptions.map((job) => (
-                  <option key={job.jobCode || job.jobTitle} value={job.jobCode || job.jobTitle}>
-                    {(job.departmentNames?.length ? job.departmentNames.join("، ") : form.department) || "بدون قسم محدد"} — {job.jobTitle || job.name} {job.jobCode ? `(${job.jobCode})` : ""}
-                  </option>
-                ))}
-              </select>
+                onChange={changeJob}
+                placeholder="اختر المسمى الوظيفي"
+                searchPlaceholder="ابحث عن مسمى وظيفي"
+                className="h-10"
+                options={jobOptions.map((job) => ({ value: job.jobCode || job.jobTitle, label: job.jobTitle || job.name }))}
+              />
             </label>
             <ReadOnly
               label="القسم التابع"
@@ -946,7 +943,7 @@ export function EmployeeDialog({
             <Field label="الدرجة الوظيفية" value={form.jobGrade} onChange={(v) => set("jobGrade", v)} />
             <Field label="استحقاق الدرجة التالية" type="date" value={form.nextGradeEligibility} onChange={(v) => set("nextGradeEligibility", v)} />
             <FixedSelect label="المشروع المحمّل عليه" value={form.project} onChange={(v) => { set("project", v); set("projectJobTitle", ""); }} options={[...(structure.projects || []).map((p: any) => p.name), form.project].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)} />
-            <label className="space-y-1.5"><span className="block text-sm font-medium">المسمى المحمّل على المشروع</span><select value={projectJobs.find((item: any) => item.jobTitle === form.projectJobTitle)?.id || ""} onChange={(e) => changeProjectJob(e.target.value)} disabled={!projectJobs.length} className="h-10 w-full rounded-md border bg-white px-3 text-right"><option value="">{projectJobs.length ? "اختر وظيفة المشروع" : "اختر المشروع أولًا"}</option>{projectJobs.map((item: any) => <option key={item.id} value={item.id}>{item.jobTitle} — {item.salary} ({item.coverage}%)</option>)}</select></label>
+            <label className="space-y-1.5"><span className="block text-sm font-medium">المسمى المحمّل على المشروع</span><SearchableSelect value={String(projectJobs.find((item: any) => item.jobTitle === form.projectJobTitle)?.id || "")} onChange={changeProjectJob} placeholder={projectJobs.length ? "اختر وظيفة المشروع" : "اختر المشروع أولًا"} searchPlaceholder="ابحث عن مسمى وظيفي" disabled={!projectJobs.length} className="h-10" options={projectJobs.map((item: any) => ({ value: String(item.id), label: item.jobTitle }))}/></label>
             <Field label="نسبة تغطية الراتب على المشروع (%)" type="number" value={form.projectCoverage} onChange={(v) => set("projectCoverage", v)} />
           </FieldGroup>
 
@@ -1114,18 +1111,7 @@ function Choice({
   return (
     <label className="space-y-1.5">
       <span className="block text-sm font-medium">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-full rounded-md border bg-white px-3 text-right"
-      >
-        <option value="">اختر</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      <SearchableSelect value={value} onChange={onChange} placeholder={`اختر ${label}`} searchPlaceholder={`ابحث عن ${label}`} allowClear options={options.map((option) => ({ value: option, label: option }))} />
     </label>
   );
 }
@@ -1134,10 +1120,7 @@ function FixedSelect({ label, value, onChange, options }: { label: string; value
   return (
     <label className="space-y-1.5">
       <span className="block text-sm font-medium">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="h-10 w-full rounded-md border bg-white px-3 text-right" disabled={!options.length}>
-        <option value="">{options.length ? `اختر ${label}` : `لا توجد ${label} مضافة`}</option>
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
-      </select>
+      <SearchableSelect value={value} onChange={onChange} placeholder={options.length ? `اختر ${label}` : `لا توجد ${label} مضافة`} searchPlaceholder={`ابحث عن ${label}`} allowClear options={options.map((option) => ({ value: option, label: option }))} disabled={!options.length} />
     </label>
   );
 }
