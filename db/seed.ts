@@ -64,6 +64,7 @@ export async function ensureEmployeeFields(){
   if(userCount?.count){
     await db.prepare("UPDATE system_users SET username=COALESCE(NULLIF(username,''),LOWER(email)) WHERE username IS NULL OR username='' ").run();
   }
+  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_system_users_username ON system_users(LOWER(username)) WHERE username IS NOT NULL AND username<>''").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS cadre_types (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)").run();
   await db.prepare("INSERT OR IGNORE INTO cadre_types (name) SELECT DISTINCT TRIM(cadre_type) FROM employees WHERE cadre_type IS NOT NULL AND TRIM(cadre_type)<>''").run();
   await db.batch(DEFAULT_CADRE_TYPES.map(name=>db.prepare("INSERT OR IGNORE INTO cadre_types (name) VALUES (?)").bind(name)));
