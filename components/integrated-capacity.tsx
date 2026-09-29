@@ -62,6 +62,7 @@ export function IntegratedCapacity() {
   const [department, setDepartment] = useState("all");
   const [jobTitle, setJobTitle] = useState("all");
   const [deficitOnly, setDeficitOnly] = useState(false);
+  const [surplusOnly, setSurplusOnly] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(25);
 
@@ -108,10 +109,10 @@ export function IntegratedCapacity() {
         (department === "all" || row.departmentName === department) &&
         (jobTitle === "all" || row.jobTitle === jobTitle) &&
         (!query || `${text} ${employeeNames}`.includes(query.trim())) &&
-        (!deficitOnly || row.gap > 0)
+        ((!deficitOnly && !surplusOnly) || (deficitOnly && row.gap > 0) || (surplusOnly && employeesFor(row).length > row.required))
       );
     });
-  }, [capacity, employees, hospital, administration, department, jobTitle, query, deficitOnly]);
+  }, [capacity, employees, hospital, administration, department, jobTitle, query, deficitOnly, surplusOnly]);
 
   const options = useMemo(() => ({
     hospitals: Array.from(new Set((capacity?.staffing || []).map((r) => r.hospitalName))).sort(),
@@ -122,11 +123,12 @@ export function IntegratedCapacity() {
 
   const totals = filteredStaffing.reduce((sum, row) => {
     const actual = employeesFor(row).length;
-    return { required: sum.required + row.required, actual: sum.actual + actual, gap: sum.gap + Math.max(row.required - actual, 0) };
-  }, { required: 0, actual: 0, gap: 0 });
+    return { required: sum.required + row.required, actual: sum.actual + actual, gap: sum.gap + Math.max(row.required - actual, 0), surplus: sum.surplus + Math.max(actual - row.required, 0), covered: sum.covered + Math.min(actual, row.required) };
+  }, { required: 0, actual: 0, gap: 0, surplus: 0, covered: 0 });
+  const coverage = totals.required ? Math.round(totals.covered / totals.required * 100) : 0;
   const pageCount = Math.max(1, Math.ceil(filteredStaffing.length / pageSize));
   const pagedStaffing = filteredStaffing.slice((page - 1) * pageSize, page * pageSize);
-  useEffect(() => { setPage(1); }, [query, hospital, administration, department, jobTitle, deficitOnly, pageSize]);
+  useEffect(() => { setPage(1); }, [query, hospital, administration, department, jobTitle, deficitOnly, surplusOnly, pageSize]);
   useEffect(() => { if (page > pageCount) setPage(pageCount); }, [page, pageCount]);
   const capacityStructure: Structure = {
     hospitals: capacity?.hospitals || [],
@@ -147,11 +149,13 @@ export function IntegratedCapacity() {
       <Button variant="outline" onClick={load} disabled={loading} className="gap-2"><RefreshCw className={loading ? "size-4 animate-spin" : "size-4"}/>تحديث البيانات</Button>
     </div>
 
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <Summary title="السجلات الوظيفية" value={filteredStaffing.length}/>
       <Summary title="إجمالي الاحتياج" value={totals.required}/>
       <Summary title="الموظفون الموجودون فعليًا" value={totals.actual} tone="green"/>
       <Summary title="العجز المحسوب من الموظفين" value={totals.gap} tone="red"/>
+      <Summary title="الفائض عن الاحتياج" value={totals.surplus} tone="amber"/>
+      <Summary title="نسبة تغطية الاحتياج" value={coverage} suffix="%" tone="blue"/>
     </section>
 
     <section className="rounded-2xl border border-[#dfe5e9] bg-white p-4 shadow-sm">
@@ -163,19 +167,20 @@ export function IntegratedCapacity() {
         <Filter value={department} setValue={setDepartment} label="القسم" values={options.departments}/>
         <Filter value={jobTitle} setValue={setJobTitle} label="المسمى الوظيفي" values={options.jobs}/>
       </div>
-      <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#a50f27]"><input type="checkbox" checked={deficitOnly} onChange={(e) => setDeficitOnly(e.target.checked)} className="size-4 accent-[#a50f27]"/>عرض الوظائف التي فيها عجز فقط</label>
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2"><label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-[#a50f27]"><input type="checkbox" checked={deficitOnly} onChange={(e) => setDeficitOnly(e.target.checked)} className="size-4 accent-[#a50f27]"/>عرض الوظائف التي فيها عجز</label><label className="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-amber-700"><input type="checkbox" checked={surplusOnly} onChange={(e) => setSurplusOnly(e.target.checked)} className="size-4 accent-amber-600"/>عرض الوظائف التي فيها فائض</label></div>
     </section>
 
     <section className="overflow-hidden rounded-2xl border border-[#dfe5e9] bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b px-5 py-4 font-bold"><UsersRound className="size-5 text-[#a50f27]"/>تفاصيل الموظفين حسب الاحتياج</div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] border-collapse text-[0.9rem]">
-          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-3 text-right font-bold">{title}</th>)}</tr></thead>
-          <tbody>{loading ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={8} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
+          <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الفائض", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-3 text-right font-bold">{title}</th>)}</tr></thead>
+          <tbody>{loading ? <tr><td colSpan={9} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={9} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
             const matched = employeesFor(row);
             const actual = matched.length;
             const gap = Math.max(row.required - actual, 0);
-            return <tr key={row.id} className="align-top hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-3 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className="whitespace-nowrap border-b px-3 py-3 text-center"><EmployeeNamesCell employees={matched} jobCodes={jobCodes} structure={capacityStructure} cadreOptions={cadreOptions} onSaved={load}/></td></tr>;
+            const surplus = Math.max(actual - row.required, 0);
+            return <tr key={row.id} className={`align-top ${gap > 0 ? "bg-[#fffafb]" : surplus > 0 ? "bg-amber-50/60" : ""} hover:bg-[#f7f9fa]`}><td className="whitespace-nowrap border-b px-3 py-3 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${surplus > 0 ? "text-amber-700" : "text-[#89939c]"}`}>{surplus > 0 ? <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1">فائض {nf.format(surplus)}</span> : nf.format(0)}</td><td className="whitespace-nowrap border-b px-3 py-3 text-center"><EmployeeNamesCell employees={matched} jobCodes={jobCodes} structure={capacityStructure} cadreOptions={cadreOptions} onSaved={load}/></td></tr>;
           })}</tbody>
         </table>
       </div>
@@ -238,7 +243,7 @@ function Filter({ value, setValue, label, values }: { value: string; setValue: (
   return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#6b7681]">{label}</span><SearchableFilterInput value={selected} onChange={(next) => setValue(next || "all")} placeholder={label} allLabel="الكل" options={values} /></label>;
 }
 
-function Summary({ title, value, tone = "blue" }: { title: string; value: number; tone?: "blue" | "green" | "red" }) {
-  const color = tone === "green" ? "border-r-emerald-600" : tone === "red" ? "border-r-[#b5122b]" : "border-r-[#197b9a]";
-  return <div className={`rounded-2xl border border-[#dfe5e9] border-r-4 ${color} bg-white p-4 shadow-sm`}><p className="text-sm text-[#6b7681]">{title}</p><p className="mt-2 text-3xl font-extrabold" dir="ltr">{nf.format(value)}</p></div>;
+function Summary({ title, value, tone = "blue", suffix = "" }: { title: string; value: number; tone?: "blue" | "green" | "red" | "amber"; suffix?: string }) {
+  const color = tone === "green" ? "border-r-emerald-600" : tone === "red" ? "border-r-[#b5122b]" : tone === "amber" ? "border-r-amber-500" : "border-r-[#197b9a]";
+  return <div className={`rounded-2xl border border-[#dfe5e9] border-r-4 ${color} bg-white p-4 shadow-sm`}><p className="text-sm text-[#6b7681]">{title}</p><p className="mt-2 text-3xl font-extrabold" dir="ltr">{nf.format(value)}{suffix}</p></div>;
 }
