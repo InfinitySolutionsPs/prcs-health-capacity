@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { EmployeeDialog, type Structure } from "@/app/hr/page";
 import { SearchableFilterInput } from "@/components/searchable-filter";
 import { SearchableSelect } from "@/components/searchable-select";
+import { employeeMatchesPosition } from "@/lib/staffing-match";
 
 type Staffing = {
   id: number;
@@ -14,6 +15,7 @@ type Staffing = {
   division: string;
   departmentName: string;
   jobTitle: string;
+  jobCode?: string | null;
   required: number;
   available: number;
   gap: number;
@@ -22,6 +24,7 @@ type Employee = {
   id: number;
   full_name?: string;
   employee_code?: string;
+  job_code?: string;
   job_title?: string;
   facility?: string;
   main_administration?: string;
@@ -42,13 +45,6 @@ type CapacityData = {
 const nf = new Intl.NumberFormat("en-US");
 const clean = (value: unknown) => String(value ?? "").trim();
 const active = (e: Employee) => !e.status || e.status === "على رأس عمله";
-const facilityKey = (value: unknown) => {
-  const name = clean(value);
-  if (name === "مستشفى الامل" || name === "مستشفى الأمل") return "مستشفى الأمل";
-  if (name === "مستشفى السرايا الميداني") return "مستشفى السرايا";
-  if (name === "مستشفى التاهيل الطبي") return "مستشفى التأهيل الطبي";
-  return name;
-};
 
 export function IntegratedCapacity() {
   const [capacity, setCapacity] = useState<CapacityData | null>(null);
@@ -93,9 +89,15 @@ export function IntegratedCapacity() {
   useEffect(() => { load(); }, []);
 
   const employeesFor = (row: Staffing) => employees.filter((employee) => {
-    return active(employee) &&
-      facilityKey(employee.facility) === facilityKey(row.hospitalName) &&
-      clean(employee.job_title) === clean(row.jobTitle);
+    return active(employee) && employeeMatchesPosition({
+      jobCode: employee.job_code,
+      jobTitle: employee.job_title,
+      facility: employee.facility,
+      mainAdministration: employee.main_administration,
+      administration: employee.administration,
+      department: employee.department,
+      status: employee.status,
+    }, row);
   });
 
   const filteredStaffing = useMemo(() => {
