@@ -30,10 +30,10 @@ function normalize(value: unknown) {
 }
 
 function facilityKey(value: unknown) {
-  const name = normalize(value);
-  if ((name.includes("نقاط") || name.includes("نقطه")) && name.includes("طبيه")) return "الرعايهالصحيهالاوليه";
-  if (name.includes("رعايهصحيه") && name.includes("اوليه")) return "الرعايهالصحيهالاوليه";
-  return name;
+  // Preserve the clinic/center name. Collapsing every medical point into a
+  // single "primary health care" key caused staff from Al-Shamal, for example,
+  // to appear under Al-Bureij.
+  return normalize(value).replace(/^(?:ال)?(?:عياده|عيادات|نقطه|نقاط|مركز)/, "");
 }
 
 function organizationKey(value: unknown) {
