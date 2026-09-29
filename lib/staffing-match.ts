@@ -40,6 +40,10 @@ function organizationKey(value: unknown) {
   return normalize(value).replace(/^(?:ال)?(?:عياده|عيادات|نقطه|نقاط|مركز|قسم)/, "");
 }
 
+function isSpecificClinic(value: unknown) {
+  return /^(?:ال)?(?:عياده|عيادات|نقطه|نقاط|مركز)/.test(normalize(value));
+}
+
 export function countMatchingEmployees(employees: EmployeePosition[], position: StaffingPosition) {
   return employees.reduce((total, employee) => total + (employeeMatchesPosition(employee, position) ? Number(employee.employeeCount || 1) : 0), 0);
 }
@@ -53,6 +57,14 @@ export function employeeMatchesPosition(employee: EmployeePosition, position: St
   if (employee.status && employee.status !== "على رأس عمله") return false;
   const sameJob = (wantedCode && normalize(employee.jobCode) === wantedCode) || normalize(employee.jobTitle) === wantedJob;
   if (!sameJob || facilityKey(employee.facility) !== wantedFacility) return false;
+
+  // Some clinics share one parent facility name (for example "الرعاية الصحية
+  // الأولية"). In that case the employee's department stores the actual
+  // clinic. An exact clinic row must take precedence over shared directorate
+  // or administration names.
+  if (isSpecificClinic(position.departmentName)) {
+    return organizationKey(employee.department) === organizationKey(position.departmentName);
+  }
 
   const employeeOrganizations = [employee.mainAdministration, employee.administration, employee.department]
     .map(organizationKey)
