@@ -5,7 +5,6 @@ import { Eye, RefreshCw, Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { EmployeeDialog, type Structure } from "@/app/hr/page";
-import { SearchableFilterInput } from "@/components/searchable-filter";
 import { SearchableSelect } from "@/components/searchable-select";
 import { employeeMatchesPosition } from "@/lib/staffing-match";
 
@@ -43,7 +42,6 @@ type CapacityData = {
 };
 
 const nf = new Intl.NumberFormat("en-US");
-const clean = (value: unknown) => String(value ?? "").trim();
 const active = (e: Employee) => !e.status || e.status === "على رأس عمله";
 
 export function IntegratedCapacity() {
@@ -88,43 +86,41 @@ export function IntegratedCapacity() {
 
   useEffect(() => { load(); }, []);
 
-  const employeesFor = (row: Staffing) => employees.filter((employee) => {
-    return active(employee) && employeeMatchesPosition({
-      jobCode: employee.job_code,
-      jobTitle: employee.job_title,
-      facility: employee.facility,
-      mainAdministration: employee.main_administration,
-      administration: employee.administration,
-      department: employee.department,
-      status: employee.status,
-    }, row);
-  });
-
   const filteredStaffing = useMemo(() => {
     if (!capacity) return [];
     return capacity.staffing.filter((row) => {
       const text = `${row.hospitalName} ${row.division} ${row.departmentName} ${row.jobTitle}`;
-      const employeeNames = employeesFor(row).map((employee) => clean(employee.full_name)).join(" ");
       return (
         (hospital === "all" || row.hospitalName === hospital) &&
         (administration === "all" || row.division === administration) &&
         (department === "all" || row.departmentName === department) &&
         (jobTitle === "all" || row.jobTitle === jobTitle) &&
-        (!query || `${text} ${employeeNames}`.includes(query.trim())) &&
-        ((!deficitOnly && !surplusOnly) || (deficitOnly && row.gap > 0) || (surplusOnly && employeesFor(row).length > row.required))
+        (!query || text.toLocaleLowerCase("ar").includes(query.trim().toLocaleLowerCase("ar"))) &&
+        ((!deficitOnly && !surplusOnly) || (deficitOnly && row.gap > 0) || (surplusOnly && row.available > row.required))
       );
     });
-  }, [capacity, employees, hospital, administration, department, jobTitle, query, deficitOnly, surplusOnly]);
+  }, [capacity, hospital, administration, department, jobTitle, query, deficitOnly, surplusOnly]);
 
-  const options = useMemo(() => ({
-    hospitals: Array.from(new Set((capacity?.staffing || []).map((r) => r.hospitalName))).sort(),
-    administrations: Array.from(new Set((capacity?.staffing || []).map((r) => r.division))).sort(),
-    departments: Array.from(new Set((capacity?.staffing || []).map((r) => r.departmentName))).sort(),
-    jobs: Array.from(new Set((capacity?.staffing || []).map((r) => r.jobTitle))).sort(),
-  }), [capacity]);
+  const options = useMemo(() => {
+    const rows = capacity?.staffing || [];
+    const atHospital = rows.filter((row) => hospital === "all" || row.hospitalName === hospital);
+    const atAdministration = atHospital.filter((row) => administration === "all" || row.division === administration);
+    const atDepartment = atAdministration.filter((row) => department === "all" || row.departmentName === department);
+    const unique = (items: string[]) => Array.from(new Set(items.filter(Boolean))).sort((a, b) => a.localeCompare(b, "ar"));
+    return {
+      hospitals: unique(rows.map((row) => row.hospitalName)),
+      administrations: unique(atHospital.map((row) => row.division)),
+      departments: unique(atAdministration.map((row) => row.departmentName)),
+      jobs: unique(atDepartment.map((row) => row.jobTitle)),
+    };
+  }, [capacity, hospital, administration, department]);
+
+  useEffect(() => { setAdministration("all"); setDepartment("all"); setJobTitle("all"); }, [hospital]);
+  useEffect(() => { setDepartment("all"); setJobTitle("all"); }, [administration]);
+  useEffect(() => { setJobTitle("all"); }, [department]);
 
   const totals = filteredStaffing.reduce((sum, row) => {
-    const actual = employeesFor(row).length;
+    const actual = row.available;
     return { required: sum.required + row.required, actual: sum.actual + actual, gap: sum.gap + Math.max(row.required - actual, 0), surplus: sum.surplus + Math.max(actual - row.required, 0), covered: sum.covered + Math.min(actual, row.required) };
   }, { required: 0, actual: 0, gap: 0, surplus: 0, covered: 0 });
   const coverage = totals.required ? Math.round(totals.covered / totals.required * 100) : 0;
@@ -178,11 +174,10 @@ export function IntegratedCapacity() {
         <table className="w-full min-w-[980px] border-collapse text-[0.9rem]">
           <thead className="bg-[#f7f9fa]"><tr>{["المستشفى / المركز", "الإدارة الرئيسية", "القسم", "المسمى الوظيفي", "الاحتياج", "الموجود فعليًا", "العجز", "الفائض", "الموظفون"].map((title) => <th key={title} className="whitespace-nowrap border-b px-3 py-3 text-right font-bold">{title}</th>)}</tr></thead>
           <tbody>{loading ? <tr><td colSpan={9} className="p-10 text-center text-[#6b7681]">جاري تحميل البيانات...</td></tr> : filteredStaffing.length === 0 ? <tr><td colSpan={9} className="p-10 text-center text-[#6b7681]">لا توجد نتائج حسب الفلاتر المحددة.</td></tr> : pagedStaffing.map((row) => {
-            const matched = employeesFor(row);
-            const actual = matched.length;
+            const actual = row.available;
             const gap = Math.max(row.required - actual, 0);
             const surplus = Math.max(actual - row.required, 0);
-            return <tr key={row.id} className={`align-top ${gap > 0 ? "bg-[#fffafb]" : surplus > 0 ? "bg-amber-50/60" : ""} hover:bg-[#f7f9fa]`}><td className="whitespace-nowrap border-b px-3 py-3 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${surplus > 0 ? "text-amber-700" : "text-[#89939c]"}`}>{surplus > 0 ? <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1">فائض {nf.format(surplus)}</span> : nf.format(0)}</td><td className="whitespace-nowrap border-b px-3 py-3 text-center"><EmployeeNamesCell employees={matched} jobCodes={jobCodes} structure={capacityStructure} cadreOptions={cadreOptions} onSaved={load}/></td></tr>;
+            return <tr key={row.id} className={`align-top ${gap > 0 ? "bg-[#fffafb]" : surplus > 0 ? "bg-amber-50/60" : ""} hover:bg-[#f7f9fa]`}><td className="whitespace-nowrap border-b px-3 py-3 font-semibold">{row.hospitalName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.division}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.departmentName}</td><td className="whitespace-nowrap border-b px-3 py-3">{row.jobTitle}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold">{nf.format(row.required)}</td><td className="whitespace-nowrap border-b px-3 py-3 font-bold text-emerald-700">{nf.format(actual)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${gap > 0 ? "text-[#b5122b]" : "text-emerald-700"}`}>{nf.format(gap)}</td><td className={`whitespace-nowrap border-b px-3 py-3 font-bold ${surplus > 0 ? "text-amber-700" : "text-[#89939c]"}`}>{surplus > 0 ? <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1">فائض {nf.format(surplus)}</span> : nf.format(0)}</td><td className="whitespace-nowrap border-b px-3 py-3 text-center"><EmployeeNamesCell employees={employees} position={row} employeeCount={actual} jobCodes={jobCodes} structure={capacityStructure} cadreOptions={cadreOptions} onSaved={load}/></td></tr>;
           })}</tbody>
         </table>
       </div>
@@ -191,24 +186,34 @@ export function IntegratedCapacity() {
   </div>;
 }
 
-function EmployeeNamesCell({ employees, jobCodes, structure, cadreOptions, onSaved }: { employees: Employee[]; jobCodes: any[]; structure: Structure; cadreOptions: string[]; onSaved: () => Promise<void> }) {
+function EmployeeNamesCell({ employees, position, employeeCount, jobCodes, structure, cadreOptions, onSaved }: { employees: Employee[]; position: Staffing; employeeCount: number; jobCodes: any[]; structure: Structure; cadreOptions: string[]; onSaved: () => Promise<void> }) {
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<Employee | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const pages = Math.max(1, Math.ceil(employees.length / pageSize));
-  const visible = employees.slice((page - 1) * pageSize, page * pageSize);
-  useEffect(() => setPage(1), [employees.length, pageSize]);
-  if (!employees.length) return <span className="text-[#89939c]">لا يوجد موظفون</span>;
+  const matchedEmployees = useMemo(() => open ? employees.filter((employee) => active(employee) && employeeMatchesPosition({
+    jobCode: employee.job_code,
+    jobTitle: employee.job_title,
+    facility: employee.facility,
+    mainAdministration: employee.main_administration,
+    administration: employee.administration,
+    department: employee.department,
+    status: employee.status,
+  }, position)) : [], [open, employees, position]);
+  const pages = Math.max(1, Math.ceil(matchedEmployees.length / pageSize));
+  const visible = matchedEmployees.slice((page - 1) * pageSize, page * pageSize);
+  useEffect(() => setPage(1), [matchedEmployees.length, pageSize]);
+  if (!employeeCount) return <span className="text-[#89939c]">لا يوجد موظفون</span>;
   return <>
     <Button variant="outline" size="sm" onClick={() => setOpen(true)} className="gap-2 border-[#b5122b] text-[#a50f27]">
-      <Eye className="size-4"/>عرض الموظفين ({nf.format(employees.length)})
+      <Eye className="size-4"/>عرض الموظفين ({nf.format(employeeCount)})
     </Button>
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent dir="rtl" className="w-[95vw] max-w-6xl text-right">
-        <DialogHeader className="text-right"><DialogTitle>الموظفون الموجودون فعليًا</DialogTitle><DialogDescription>اضغط على اسم الموظف لعرض تفاصيله.</DialogDescription></DialogHeader>
+        <DialogHeader className="text-right"><DialogTitle>الموظفون الموجودون فعليًا — {position.hospitalName} / {position.departmentName}</DialogTitle><DialogDescription>اضغط على اسم الموظف لعرض تفاصيله. العدد: {nf.format(matchedEmployees.length)}</DialogDescription></DialogHeader>
         <div className="overflow-x-auto rounded-xl border">
           <table className="w-full border-collapse text-xs"><thead className="bg-[#f7f9fa]"><tr><th className="whitespace-nowrap border-b px-3 py-2 text-right">#</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">اسم الموظف</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">المسمى الوظيفي</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">مركز العمل</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">القسم</th><th className="whitespace-nowrap border-b px-3 py-2 text-right">الحالة</th></tr></thead><tbody>{visible.map((employee, index) => <tr key={employee.id} className="hover:bg-[#fffafb]"><td className="whitespace-nowrap border-b px-3 py-2">{(page - 1) * pageSize + index + 1}</td><td className="whitespace-nowrap border-b px-3 py-2"><button type="button" onClick={() => setDetail(employee)} className="font-semibold text-[#a50f27] underline underline-offset-4">{employee.full_name || "بدون اسم"}</button></td><td className="whitespace-nowrap border-b px-3 py-2">{employee.job_title || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.facility || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.department || "—"}</td><td className="whitespace-nowrap border-b px-3 py-2">{employee.status || "على رأس عمله"}</td></tr>)}</tbody></table>
+          {!matchedEmployees.length && <p className="p-6 text-center text-sm text-[#7a858f]">لا يوجد موظفون مطابقون لهذا القسم.</p>}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm"><label className="flex items-center gap-2">عدد الموظفين في الصفحة<SearchableSelect value={String(pageSize)} onChange={(value) => setPageSize(Number(value))} placeholder="عدد الموظفين" searchPlaceholder="ابحث عن العدد" className="h-9 w-24" contentClassName="min-w-48" options={[5,10,25,50].map(value=>({value:String(value),label:String(value)}))}/></label><div className="flex items-center gap-2"><Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>السابق</Button><span>صفحة {page} من {pages}</span><Button variant="outline" size="sm" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>التالي</Button></div></div>
       </DialogContent>
@@ -241,8 +246,7 @@ function EmployeeEditDialog({ employee, open, onOpenChange }: { employee: Employ
 }
 
 function Filter({ value, setValue, label, values }: { value: string; setValue: (value: string) => void; label: string; values: string[] }) {
-  const selected = value === "all" ? "" : value;
-  return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#6b7681]">{label}</span><SearchableFilterInput value={selected} onChange={(next) => setValue(next || "all")} placeholder={label} allLabel="الكل" options={values} /></label>;
+  return <label className="block"><span className="mb-1 block text-xs font-semibold text-[#6b7681]">{label}</span><SearchableSelect value={value} onChange={setValue} placeholder={`الكل — ${label}`} searchPlaceholder={`ابحث عن ${label}`} options={[{ value: "all", label: `الكل — ${label}` }, ...values.map((item) => ({ value: item, label: item }))]} /></label>;
 }
 
 function Summary({ title, value, tone = "blue", suffix = "" }: { title: string; value: number; tone?: "blue" | "green" | "red" | "amber"; suffix?: string }) {
