@@ -22,6 +22,20 @@ export async function GET(req: Request) {
     console.error("HR data initialization failed; continuing with existing employees", error);
   }
   const filterColumns = { jobTitle: "job_title", facility: "facility", administration: "administration", department: "department", status: "status", cadreType: "cadre_type", project: "project" } as const;
+  const capacityView = u.searchParams.get("capacity") === "1";
+  if (capacityView) {
+    try {
+      const [capacityEmployees, jobCodes, cadreTypes] = await Promise.all([
+        db.prepare("SELECT id,full_name,employee_code,job_code,job_title,facility,main_administration,administration,department,status FROM employees WHERE status IS NULL OR TRIM(status)='' OR status='على رأس عمله' ORDER BY full_name").all(),
+        db.prepare("SELECT job_code AS jobCode,job_title AS jobTitle,category_code AS categoryCode,main_administration AS mainAdministration,COUNT(*) AS employeeCount FROM employees WHERE job_code IS NOT NULL GROUP BY job_code,job_title,category_code,main_administration ORDER BY main_administration,job_title").all(),
+        db.prepare("SELECT id,name FROM cadre_types ORDER BY name").all(),
+      ]);
+      return NextResponse.json({ employees: capacityEmployees.results, jobCodes: jobCodes.results, cadreTypes: cadreTypes.results });
+    } catch (error) {
+      console.error("Capacity employee query failed", error);
+      return NextResponse.json({ error: "تعذر تحميل الموظفين" }, { status: 500 });
+    }
+  }
   const clauses: string[] = [];
   const args: string[] = [];
   if (q) {

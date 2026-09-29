@@ -6,6 +6,7 @@ export type EmployeePosition = {
   administration?: string | null;
   department?: string | null;
   status?: string | null;
+  employeeCount?: number | null;
 };
 
 export type StaffingPosition = {
@@ -40,7 +41,7 @@ function organizationKey(value: unknown) {
 }
 
 export function countMatchingEmployees(employees: EmployeePosition[], position: StaffingPosition) {
-  return employees.filter((employee) => employeeMatchesPosition(employee, position)).length;
+  return employees.reduce((total, employee) => total + (employeeMatchesPosition(employee, position) ? Number(employee.employeeCount || 1) : 0), 0);
 }
 
 export function employeeMatchesPosition(employee: EmployeePosition, position: StaffingPosition) {

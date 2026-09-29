@@ -67,7 +67,7 @@ export function IntegratedCapacity() {
     try {
       const [capacityRes, employeesRes] = await Promise.all([
         fetch("/api/data", { cache: "no-store" }),
-        fetch("/api/hr?limit=10000", { cache: "no-store" }),
+        fetch("/api/hr?capacity=1", { cache: "no-store" }),
       ]);
       if (!capacityRes.ok || !employeesRes.ok) throw new Error("تعذر تحميل بيانات الدمج");
       const [capacityBody, employeesBody] = await Promise.all([
